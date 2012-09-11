@@ -41,6 +41,7 @@ Our training and test data sets are generated through the Matlab code presented 
 \lstinputlisting[caption={The code which generates our data set},label=code]{preprocess_data.m}
 
 \section*{Exercise 2}
+\label{sec:two}
 Confusion matrices of the KNN with $1 \leq k \leq 20$:
 
 \begin{table}
@@ -91,5 +92,27 @@ $k$ && CA & CB \\ \\
 \end{table}
 
 \section*{Exercise 3}
+\begin{enumerate}
+    \item \textit{Discuss briefly (200 words) what the advantage would be of using a method like cross-validation or
+bootstrapping in this context.}
+
+The method used in section \ref{sec:two} biases the machine towards the test set. The test set should normally be
+used to evaluate the machine learning algorithm and/or its parameters. The test set should not be used to 
+select a model, as was implied in section \ref{sec:two}. 
+Cross-validation can be used to fairly evaluate models using solely the training set without the risk of 
+introducing a bias for one specific validation set. 
+
+Bootstrapping 
+
+\item \textit{Implement 10-fold cross-validation, and give an estimate for a good value of k.}
+
+\item \textit{Can you use this estimate of k in your ﬁnal classiﬁer? What is the use of doing cross-validation?}
+
+\item \textit{ How do you compute the test error? What is it an estimate of? What would be the use of a validation
+set? }
+
+
+
+\end{enumerate}
 
 \end{document}
