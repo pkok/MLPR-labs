@@ -1,6 +1,6 @@
 function confusion_matrices = apply_knn(training, labels, test_A, test_B, k_max)
 min_k = min(k_max)
-confusion_matrices = cell(size(k_max)(2))
+confusion_matrices = cell(size(k_max, 2))
 
 for k = k_max,
   net = knn(2, 2, k, training, labels);
