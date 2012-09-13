@@ -8,6 +8,40 @@
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
 \newcommand{\convolution}{\ensuremath{+\negmedspace\negmedspace\negmedspace\times}}
 
+%% Provide \Autoref; the \autoref with a printed capital
+\def\figureautorefname{figure}
+\def\tableautorefname{table}
+\def\partautorefname{part}
+\def\appendixautorefname{appendix}
+\def\equationautorefname{equation}
+\def\AMSautorefname{equation}
+\def\theoremautorefname{theorem}
+\def\enumerationautorefname{case}
+\def\Autoref#1{%
+  \begingroup
+  \edef\reserved@a{\cpttrimspaces{#1}}%
+  \ifcsndefTF{r@#1}{%
+    \xaftercsname{\expandafter\testreftype\@fourthoffive}
+      {r@\reserved@a}.\\{#1}%
+  }{%
+    \ref{#1}%
+  }%
+  \endgroup
+}
+\def\testreftype#1.#2\\#3{%
+  \ifcsndefTF{#1autorefname}{%
+    \def\reserved@a##1##2\@nil{%
+      \uppercase{\def\ref@name{##1}}%
+      \csn@edef{#1autorefname}{\ref@name##2}%
+      \autoref{#3}%
+    }%
+    \reserved@a#1\@nil
+  }{%
+    \autoref{#3}%
+  }%
+}
+
+ 
 \author{Maarten Inja \and Patrick de Kok}
 \title{MLPR: Lab 1}
 
@@ -49,10 +83,12 @@ resulting graph in your report. Which value of k would you use, and why? Can you
 conclusions from this experiment?
 }
 
+% We gebruiken alleen maar oneven waarden voor $k$; je kunt anders een gelijke stemming hebben bij welke klasse een test sample hoort.
+
 \end{enumerate}
 
 \label{sec:two}
-Confusion matrices of the KNN with $1 \leq k \leq 20$:
+Confusion matrices of the $k$NN with $1 \leq k \leq 20$:
 
 \begin{table}
   \caption{TA = True A; TB = True B; CA = classified as A; CB = classified as B.}
@@ -106,6 +142,7 @@ $k$ && CA & CB \\ \\
     \item \textit{Discuss briefly (200 words) what the advantage would be of using a method like cross-validation or
 bootstrapping in this context.}
 
+% Je kunt ook \autoref gebruiken. Zit standaard in hyperref. Ik heb ook een definitie voor \Autoref toegevoegd; dat is \autoref, maar begint dan met een hoofdletter :)
 The method used in section \ref{sec:two} biases the machine towards the test set. The test set should normally be
 used to evaluate the machine learning algorithm and/or its parameters. The test set should not be used to 
 select a model, as was implied in section \ref{sec:two}. 
@@ -114,9 +151,9 @@ introducing a bias for one specific validation set.
 
 Bootstrapping 
 
-\item \textit{Implement 10-fold cross-validation, and give an estimate for a good value of k.}
+\item \textit{Implement 10-fold cross-validation, and give an estimate for a good value of $k$.}
 
-\item \textit{Can you use this estimate of k in your ﬁnal classiﬁer? What is the use of doing cross-validation?}
+\item \textit{Can you use this estimate of $k$ in your ﬁnal classiﬁer? What is the use of doing cross-validation?}
 
 \item \textit{ How do you compute the test error? What is it an estimate of? What would be the use of a validation
 set? }
