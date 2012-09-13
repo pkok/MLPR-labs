@@ -7,6 +7,7 @@
 
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
 \newcommand{\convolution}{\ensuremath{+\negmedspace\negmedspace\negmedspace\times}}
+\newcommand{\highlightColor}{red}
 
 %% Provide \Autoref; the \autoref with a printed capital
 \def\figureautorefname{figure}
@@ -61,11 +62,11 @@
 \begin{document}
 \maketitle
 
-\section*{Exercise 1}
+\section{The Data}
 \begin{figure}[h]
-  \caption{A plot of the dataset.  The red ``$\color{red}+$'' and magenta ``$\color{magenta}\circ$'' represent the training and test data points of class A.  The blue ``$\color{blue}\times$'' and black ``$\convolution$'' represent the training and test data points of class B.}
-  \label{plot1}
   \begin{center}
+  \caption{A plot of the dataset.  The red ``$\color{red}+$'''s represent data points from class A. The blue ``$\color{blue}\times$'''s represent data points from class B.}
+  \label{plot1}
     \includegraphics[width=0.6\paperwidth]{plot1}
   \end{center}
 \end{figure}
@@ -74,92 +75,230 @@ Our training and test data sets are generated through the Matlab code presented 
 
 \lstinputlisting[caption={The code which generates our data set},label=code]{preprocess_data.m}
 
-\section*{Exercise 2}
+\section{$k$NN classifiers}
+\label{sec:two}
+Our code can be run and experimented with by running the script ``runme'' 
+in Matlab\footnote{This script is also supported in Octave} (don't forget to
+to set up Netlab!). 
+The first two options correspond to this exercise. 
+
+An example to calculate the accuracy for a $k$NN classifier with $k = 1$\footnote{With $k \ge 3$ all accuracies will be returned for $1, 3, \ldots, k$.}
+with a test set of 25\%: 
+\begin{verbatim}
+octave:2> runme
+Choose what you want to do
+
+  [ 1] p% split, with data in order
+  [ 2] p% split, with data shuffled
+  [ 3] n-fold cross-validation, with p% test set and data in order
+  [ 4] n-fold cross-validation, with p% test set and data shuffled
+
+pick a number, any number: 2
+Which value of k do you want to use? 1
+Which percentage of your data do you want to train on? [0-1> 0.75
+ans =  0.84200
+\end{verbatim}
+
 \begin{enumerate}
 \item \textit{Train a $k$NN classifier, with $k$ = 1, on the training data, evaluate its performance on the test data and
 compute the test error.}
-\item \textit{Try other values for $k$ ($k$ = 1, 3, $\ldots$), plot how the test error evolves as a function of k and include the
-resulting graph in your report. Which value of k would you use, and why? Can you derive any definite
+
+The accuracy is $0.842$. The test error then becomes $1 - 0.842 = 0.158$. 
+
+\item \textit{Try other values for $k$ ($k$ = 1, 3, $\ldots$), plot how the test error evolves as a function of $k$ and include the
+resulting graph in your report. Which value of $k$ would you use, and why? Can you derive any definite
 conclusions from this experiment?
 }
+
+Figure \ref{fig:plot2} shows the test error as a function of $k$. From this
+plot it would be wise to chose ... for $k$ as it shows the lowest test error. 
+
+However, this choice is solely based on the test error. Depending on the 
+purpose one might also take the recall and precision into consideration. 
+
+Furthermore, the amount of data is rather small for any real conclusions.
+
+And lastly, the test set is now used as a validation set: we use the test 
+error as a manner to chose the parameter $p$ for the model. 
+This is troublesome, as a true test error might show a different value for 
+$k$; this test set might have a bias towards the value for $k$ we found.
 
 % We gebruiken alleen maar oneven waarden voor $k$; je kunt anders een gelijke stemming hebben bij welke klasse een test sample hoort.
 
 \end{enumerate}
 
-\label{sec:two}
-Confusion matrices of the $k$NN with $1 \leq k \leq 20$:
+%Confusion matrices of the $k$NN with $1 \leq k \leq 20$:
 
-\begin{table}
-  \caption{TA = True A; TB = True B; CA = classified as A; CB = classified as B.}
-\begin{tabular}{lcrr}
-$k$ && CA & CB \\ \\
- 1 & TA & 199 &    51 \\
-& TB &  34 &   216 \\
- 2 & TA & 205 &    45 \\
-& TB &  34 &   216 \\
- 3 & TA & 212 &    38 \\
-& TB &  33 &   217 \\
- 4 & TA & 217 &    33 \\
-& TB &  35 &   215 \\
- 5 & TA & 214 &    36 \\
-& TB &  30 &   220 \\
- 6 & TA & 217 &    33 \\
-& TB &  31 &   219 \\
- 7 & TA & 216 &    34 \\
-& TB &  31 &   219 \\
- 8 & TA & 221 &    29 \\
-& TB &  32 &   218 \\
- 9 & TA & 216 &    34 \\
-& TB &  30 &   220 \\
- 10 & TA & 217 &    33 \\
-& TB &  32 &   218 \\
- 11 & TA & 214 &    36 \\
-& TB &  29 &   221 \\
- 12 & TA & 215 &    35 \\
-& TB &  28 &   222 \\
- 13 & TA & 215 &    35 \\
-& TB &  31 &   219 \\
- 14 & TA & 216 &    34 \\
-& TB &  31 &   219 \\
- 15 & TA & 216 &    34 \\
-& TB &  31 &   219 \\
- 16 & TA & 213 &    37 \\
-& TB &  31 &   219 \\
- 17 & TA & 215 &    35 \\
-& TB &  35 &   215 \\
- 18 & TA & 215 &    35 \\
-& TB &  34 &   216 \\
- 19 & TA & 215 &    35 \\
-& TB &  36 &   214 \\
- 20 & TA & 216 &    34 \\
-& TB &  33 &   217 \\
-\end{tabular}
-\end{table}
 
-\section*{Exercise 3}
+\section{Cross-validation}
 \begin{enumerate}
     \item \textit{Discuss briefly (200 words) what the advantage would be of using a method like cross-validation or
 bootstrapping in this context.}
 
+\label{cv}
 % Je kunt ook \autoref gebruiken. Zit standaard in hyperref. Ik heb ook een definitie voor \Autoref toegevoegd; dat is \autoref, maar begint dan met een hoofdletter :)
-The method used in section \ref{sec:two} biases the machine towards the test set. The test set should normally be
-used to evaluate the machine learning algorithm and/or its parameters. The test set should not be used to 
-select a model, as was implied in section \ref{sec:two}. 
-Cross-validation can be used to fairly evaluate models using solely the training set without the risk of 
-introducing a bias for one specific validation set. 
+%% OH COOL! :D
+\textcolor{\highlightColor}{The available data is very limited}, there are 1000 data points per class). Plentiful data is preferable over limited 
+data. When one introduces a validation set, the already small data set is 
+divided into a training set, test set and a validation set. This means 
+especially, in this situation 
+since there already were not that many data points to begin with, 
+that the data left to learn from is very little. \textcolor{\highlightColor}{Smaller validation sets}
+are viable but \textcolor{\highlightColor}{give a relatively noisy estimate of predictive performance.}
+%TODO: cite pattern recognition and machine learning van christopher m. bishop 
 
-Bootstrapping 
+\textcolor{\highlightColor}{Cross-validation is a solution where all the data can be used to train while 
+also using all the data to assess performance.}
+
+Cross-validation is a method where one seeks to use the data as efficiently 
+as possible. Another approach when data is limited is 
+\textcolor{\highlightColor}{bootstrapping, which 
+`creates' more data from the dataset} by randomly selecting data points to 
+be duplicated. And, as always, more data is better, even when it is created
+by bootstrapping. 
+
+
+% The method used in section \ref{sec:two} biases the machine towards the test set. The test set should normally be
+% used to evaluate the machine learning algorithm and/or its parameters. The test set should not be used to 
+% select a model, as was implied in section \ref{sec:two}. 
+% Cross-validation can be used to fairly evaluate models using solely the training set without the risk of 
+% introducing a bias for one specific validation set. 
 
 \item \textit{Implement 10-fold cross-validation, and give an estimate for a good value of $k$.}
 
-\item \textit{Can you use this estimate of $k$ in your ﬁnal classiﬁer? What is the use of doing cross-validation?}
+We can run the script ``runme'' once more and use the last two options for 
+this part of the assignment.  The following table is the result:
+
+\begin{tabular}{c | c}
+\textbf{$k$} & \textbf{Accuracy} \\
+\hline
+1 &  0.85600\\ 
+3 &  0.86600\\ 
+5 &  0.87200\\ 
+7 &  0.88400\\ 
+9 &  0.88000\\ 
+11&  0.88200\\ 
+13&  0.88200\\ 
+15&  0.88600\\ 
+17&  0.88400\\ 
+19&  0.88600\\ 
+21&  0.88200\\ 
+23&  0.88600\\ 
+25&  0.87800\\ 
+\end{tabular}
+
+\textcolor{\highlightColor}{A good value for $k$ seems to be 5} as it as the highest mean accuracy of all
+values for $k$. 
+
+\item \textit{Can you use this estimate of $k$ in your final classifier? What is the use of doing cross-validation?}
+
+This is not a good estimation for a good value for $k$, but it is the best 
+bet as this value for $k$ shows the best mean accuracy. The use of doing 
+cross-validation is discussed in item \ref{cv} in this section.
 
 \item \textit{ How do you compute the test error? What is it an estimate of? What would be the use of a validation
 set? }
+\textcolor{\highlightColor}{The test error is the percentage of data points from the test set which 
+are wrongly classified.}
 
+The test set can solely be used to evaluate the (learned) model. No
+information from the test set can be used as feedback in the learning 
+process as this would mean that the test set is used to learn from. 
+\textcolor{\highlightColor}{The 
+test error shows an estimate of how well the model would perform for
+any kind of application.}
 
+In section \ref{sec:two} the test set was used to select a $k$. This is a
+typical example of something one should not do: the $k$ could be influenced
+by the test set. 
+
+\textcolor{\highlightColor}{ 
+The use of a validation set is to investigate different models and/or
+parameters without spoiling the test set.}
+Different models and parameters can be tested to find those which perform the best on a validation 
+set. Hopefully the results of these tests can be used to select those 
+model and parameters which perform best, also on the training set and new 
+data in the application for which was learned. 
+If the test set was used as the validation set, such 
+as in section \ref{sec:two}, the test set could not be used to calculate a 
+true error rate because validating models is part of the training process. 
 
 \end{enumerate}
 
 \end{document}
+
+
+
+% Run our Matlab script\footnote{This script is also compatible with Octave} 
+% ``runme''. The script asks what you want to run. The first two options run 
+% the code for this exercise. The first option will use the last part of 
+% the data as test data. The 
+% second option will compile a test set by randomly selecting elements from 
+% the data until the preferred percentage for the test set has been reached. 
+% 
+% An example input:
+% 
+% \begin{verbatim}
+% octave:7> runme
+% Choose what you want to do
+% 
+%   [ 1] p% split, with data in order
+%   [ 2] p% split, with data shuffled
+%   [ 3] n-fold cross-validation, with p% test set and data in order
+%   [ 4] n-fold cross-validation, with p% test set and data shuffled
+% 
+% pick a number, any number: 2
+% Which value of k do you want to use? 10
+% Which percentage of your data do you want to train on? [0-1> 0.75
+% ans =
+% 
+%    0.84200   0.86400   0.86800   0.88000   0.87600
+% \end{verbatim}
+
+% \begin{table}
+%   \caption{TA = True A; TB = True B; CA = classified as A; CB = classified as B.}
+% \begin{tabular}{lcrr}
+% $k$ && CA & CB \\ \\
+%  1 & TA & 199 &    51 \\
+% & TB &  34 &   216 \\
+%  2 & TA & 205 &    45 \\
+% & TB &  34 &   216 \\
+%  3 & TA & 212 &    38 \\
+% & TB &  33 &   217 \\
+%  4 & TA & 217 &    33 \\
+% & TB &  35 &   215 \\
+%  5 & TA & 214 &    36 \\
+% & TB &  30 &   220 \\
+%  6 & TA & 217 &    33 \\
+% & TB &  31 &   219 \\
+%  7 & TA & 216 &    34 \\
+% & TB &  31 &   219 \\
+%  8 & TA & 221 &    29 \\
+% & TB &  32 &   218 \\
+%  9 & TA & 216 &    34 \\
+% & TB &  30 &   220 \\
+%  10 & TA & 217 &    33 \\
+% & TB &  32 &   218 \\
+%  11 & TA & 214 &    36 \\
+% & TB &  29 &   221 \\
+%  12 & TA & 215 &    35 \\
+% & TB &  28 &   222 \\
+%  13 & TA & 215 &    35 \\
+% & TB &  31 &   219 \\
+%  14 & TA & 216 &    34 \\
+% & TB &  31 &   219 \\
+%  15 & TA & 216 &    34 \\
+% & TB &  31 &   219 \\
+%  16 & TA & 213 &    37 \\
+% & TB &  31 &   219 \\
+%  17 & TA & 215 &    35 \\
+% & TB &  35 &   215 \\
+%  18 & TA & 215 &    35 \\
+% & TB &  34 &   216 \\
+%  19 & TA & 215 &    35 \\
+% & TB &  36 &   214 \\
+%  20 & TA & 216 &    34 \\
+% & TB &  33 &   217 \\
+% \end{tabular}
+% \end{table}
+
