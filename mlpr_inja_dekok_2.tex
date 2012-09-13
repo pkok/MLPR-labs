@@ -1,5 +1,6 @@
 \documentclass[a4paper,11pt]{article}
 \usepackage{amsmath}
+\usepackage{catoptions}
 \usepackage{hyperref}
 \usepackage{graphicx}
 \usepackage{listings}
@@ -9,6 +10,7 @@
 \newcommand{\convolution}{\ensuremath{+\negmedspace\negmedspace\negmedspace\times}}
 \newcommand{\highlightColor}{red}
 
+\makeatletter
 %% Provide \Autoref; the \autoref with a printed capital
 \def\figureautorefname{figure}
 \def\tableautorefname{table}
@@ -42,6 +44,9 @@
   }%
 }
 
+
+\makeatother
+
  
 \author{Maarten Inja \and Patrick de Kok}
 \title{MLPR: Lab 1}
@@ -63,10 +68,10 @@
 \maketitle
 
 \section{The Data}
-\begin{figure}[h]
+\begin{figure}[t]
   \begin{center}
-  \caption{A plot of the dataset.  The red ``$\color{red}+$'''s represent data points from class A. The blue ``$\color{blue}\times$'''s represent data points from class B.}
-  \label{plot1}
+    \caption{A plot of the dataset.  The red ``$\color{red}+$'''s represent data points from class A.  The blue ``$\color{blue}\times$'''s represent data points from class B.}
+    \label{plot1}
     \includegraphics[width=0.6\paperwidth]{plot1}
   \end{center}
 \end{figure}
@@ -79,8 +84,8 @@ Our training and test data sets are generated through the Matlab code presented 
 \label{sec:two}
 Our code can be run and experimented with by running the script ``runme'' 
 in Matlab\footnote{This script is also supported in Octave} (don't forget to
-to set up Netlab!). 
-The first two options correspond to this exercise. 
+to set up Netlab!).  
+The first two options correspond to this exercise.  
 
 An example to calculate the accuracy for a $k$NN classifier with $k = 1$\footnote{With $k \ge 3$ all accuracies will be returned for $1, 3, \ldots, k$.}
 with a test set of 25\%: 
@@ -103,28 +108,43 @@ ans =  0.84200
 \item \textit{Train a $k$NN classifier, with $k$ = 1, on the training data, evaluate its performance on the test data and
 compute the test error.}
 
-The accuracy is $0.842$. The test error then becomes $1 - 0.842 = 0.158$. 
+As can be seen above, the accuracy is \textcolor{\highlightColor}{$0.842$}.  The test error then becomes $1 - 0.842 = \textcolor{\highlightColor}{0.158}$.  
 
 \item \textit{Try other values for $k$ ($k$ = 1, 3, $\ldots$), plot how the test error evolves as a function of $k$ and include the
-resulting graph in your report. Which value of $k$ would you use, and why? Can you derive any definite
+resulting graph in your report.  Which value of $k$ would you use, and why? Can you derive any definite
 conclusions from this experiment?
 }
 
-Figure \ref{fig:plot2} shows the test error as a function of $k$. From this
-plot it would be wise to chose ... for $k$ as it shows the lowest test error. 
+\begin{figure}[t]
+  \begin{center}
+    \caption{The test error is plotted for odd values of $k$ from 1 to 999.  A closeup for odd values of $k$ from 1 to 19 is given in \autoref{fig:plot3}.}
+    \label{fig:plot2}
+    \includegraphics[width=0.6\paperwidth]{plot2.pdf}
+  \end{center}
+\end{figure}
 
-However, this choice is solely based on the test error. Depending on the 
-purpose one might also take the recall and precision into consideration. 
+\begin{figure}[t]
+  \begin{center}
+    \caption{The test error is plotted for odd values of $k$ from 1 to 19.  A more general overview, for odd values of $k$ from 1 to 999 is given in \autoref{fig:plot2}.}
+    \label{fig:plot3}
+    \includegraphics[width=0.6\paperwidth]{plot3.pdf}
+  \end{center}
+\end{figure}
 
-Furthermore, the amount of data is rather small for any real conclusions.
+\Autoref{fig:plot2} shows the test error for $k = 1, 3, \ldots, 999$.  Based on this data, one might choose $\textcolor{\highlightColor}{k = 239}$, as it gives the \textcolor{\highlightColor}{lowest test error}, $0.104$.
 
-And lastly, the test set is now used as a validation set: we use the test 
-error as a manner to chose the parameter $k$ for the model. 
+However, with a high value for $k$, the classifier is prone to \textcolor{\highlightColor}{overfitting}.  This can be seen in the plot, as the test error goes up for sufficiently high values of $k$.  That we have a low test error for a high value of $k$, might be because of a statistical fluke in the test data.
+
+To avoid overfitting, we might consider a lower value for $k$ with a high accuracy.  For example, $k = 13$ gives an accuracy of $0.116$.  This can be seen in a closeup of the graph in \autoref{fig:plot3}.
+
+Depending on the purpose one might also take the \textcolor{\highlightColor}{recall and precision} into consideration.  
+
+Furthermore, the \textcolor{\highlightColor}{amount of data} is rather \textcolor{\highlightColor}{small} for any real conclusions.
+
+And lastly, the \textcolor{\highlightColor}{test set} is now used \textcolor{\highlightColor}{as a validation set}: we use the test 
+error as a manner to chose the parameter $k$ for the model.  
 This is troublesome, as a true test error might show a different value for 
 $k$; this test set might have a bias towards the value for $k$ we found.
-
-% We gebruiken alleen maar oneven waarden voor $k$; je kunt anders een gelijke stemming hebben bij welke klasse een test sample hoort.
-
 \end{enumerate}
 
 %Confusion matrices of the $k$NN with $1 \leq k \leq 20$:
@@ -138,12 +158,12 @@ bootstrapping in this context.}
 \label{cv}
 % Je kunt ook \autoref gebruiken. Zit standaard in hyperref. Ik heb ook een definitie voor \Autoref toegevoegd; dat is \autoref, maar begint dan met een hoofdletter :)
 %% OH COOL! :D
-\textcolor{\highlightColor}{The available data is very limited}, there are 1000 data points per class). Plentiful data is preferable over limited 
-data. When one introduces a validation set, the already small data set is 
-divided into a training set, test set and a validation set. This means 
+\textcolor{\highlightColor}{The available data is very limited}; there are 1000 data points per class.  Plentiful data is preferable over limited 
+data.  When one introduces a validation set, the already small data set is 
+divided into a training set, test set and a validation set.  This means 
 especially, in this situation 
 since there already were not that many data points to begin with, 
-that the data left to learn from is very little. \textcolor{\highlightColor}{Smaller validation sets}
+that the data left to learn from is very little.  \textcolor{\highlightColor}{Smaller validation sets}
 are viable but \textcolor{\highlightColor}{give a relatively noisy estimate of predictive performance.}
 %TODO: cite pattern recognition and machine learning van christopher m. bishop 
 
@@ -151,18 +171,18 @@ are viable but \textcolor{\highlightColor}{give a relatively noisy estimate of p
 also using all the data to assess performance.}
 
 Cross-validation is a method where one seeks to use the data as efficiently 
-as possible. Another approach when data is limited is 
+as possible.  Another approach when data is limited is 
 \textcolor{\highlightColor}{bootstrapping, which 
 `creates' more data from the dataset} by randomly selecting data points to 
-be duplicated. And, as always, more data is better, even when it is created
-by bootstrapping. 
+be duplicated.  And, as always, more data is better, even when it is created
+by bootstrapping.  
 
 
-% The method used in section \ref{sec:two} biases the machine towards the test set. The test set should normally be
-% used to evaluate the machine learning algorithm and/or its parameters. The test set should not be used to 
-% select a model, as was implied in section \ref{sec:two}. 
+% The method used in section \ref{sec:two} biases the machine towards the test set.  The test set should normally be
+% used to evaluate the machine learning algorithm and/or its parameters.  The test set should not be used to 
+% select a model, as was implied in section \ref{sec:two}.  
 % Cross-validation can be used to fairly evaluate models using solely the training set without the risk of 
-% introducing a bias for one specific validation set. 
+% introducing a bias for one specific validation set.  
 
 \item \textit{Implement 10-fold cross-validation, and give an estimate for a good value of $k$.}
 
@@ -188,13 +208,13 @@ this part of the assignment.  The following table is the result:
 \end{tabular}
 
 \textcolor{\highlightColor}{A good value for $k$ seems to be 5} as it as the highest mean accuracy of all
-values for $k$. 
+values for $k$.  
 
 \item \textit{Can you use this estimate of $k$ in your final classifier? What is the use of doing cross-validation?}
 
 This is not a good estimation for a good value for $k$, but it is the best 
-bet as this value for $k$ shows the best mean accuracy. The use of doing 
-cross-validation is discussed in item \ref{cv} and \ref{cv2} in this section. 
+bet as this value for $k$ shows the best mean accuracy.  The use of doing 
+cross-validation is discussed in item \ref{cv} and \ref{cv2} in this section.  
 
 \item \textit{ How do you compute the test error? What is it an estimate of? What would be the use of a validation
 set? } 
@@ -202,27 +222,27 @@ set? }
 \textcolor{\highlightColor}{The test error is the percentage of data points from the test set which 
 are wrongly classified.}
 
-The test set can solely be used to evaluate the (learned) model. No
+The test set can solely be used to evaluate the (learned) model.  No
 information from the test set can be used as feedback in the learning 
-process as this would mean that the test set is used to learn from. 
+process as this would mean that the test set is used to learn from.  
 \textcolor{\highlightColor}{The 
 test error shows an estimate of how well the model would perform for
 any kind of application.}
 
-In section \ref{sec:two} the test set was used to select a $k$. This is a
+In section \ref{sec:two} the test set was used to select a $k$.  This is a
 typical example of something one should not do: the $k$ could be influenced
-by the test set. 
+by the test set.  
 
 \textcolor{\highlightColor}{ 
 The use of a validation set is to investigate different models and/or
 parameters without spoiling the test set.}
 Different models and parameters can be tested to find those which perform the best on a validation 
-set. Hopefully the results of these tests can be used to select those 
+set.  Hopefully the results of these tests can be used to select those 
 model and parameters which perform best, also on the training set and new 
-data in the application for which was learned. 
+data in the application for which was learned.  
 If the test set was used as the validation set, such 
 as in section \ref{sec:two}, the test set could not be used to calculate a 
-true error rate because validating models is part of the training process. 
+true error rate because validating models is part of the training process.  
 
 \end{enumerate}
 
@@ -231,9 +251,9 @@ true error rate because validating models is part of the training process.
 
 
 % Run our Matlab script\footnote{This script is also compatible with Octave} 
-% ``runme''. The script asks what you want to run. The first two options run 
-% the code for this exercise. The first option will use the last part of 
-% the data as test data. The 
+% ``runme''.  The script asks what you want to run.  The first two options run 
+% the code for this exercise.  The first option will use the last part of 
+% the data as test data.  The 
 % second option will compile a test set by randomly selecting elements from 
 % the data until the preferred percentage for the test set has been reached. 
 % 
