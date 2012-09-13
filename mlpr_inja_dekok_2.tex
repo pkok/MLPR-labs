@@ -178,9 +178,9 @@ be duplicated.  And, as always, more data is better, even when it is created
 by bootstrapping.  
 
 
-% The method used in section \ref{sec:two} biases the machine towards the test set.  The test set should normally be
+% The method used in \autoref{sec:two} biases the machine towards the test set.  The test set should normally be
 % used to evaluate the machine learning algorithm and/or its parameters.  The test set should not be used to 
-% select a model, as was implied in section \ref{sec:two}.  
+% select a model, as was implied in \autoref{sec:two}.  
 % Cross-validation can be used to fairly evaluate models using solely the training set without the risk of 
 % introducing a bias for one specific validation set.  
 
@@ -214,7 +214,7 @@ values for $k$.
 
 This is not a good estimation for a good value for $k$, but it is the best 
 bet as this value for $k$ shows the best mean accuracy.  The use of doing 
-cross-validation is discussed in item \ref{cv} and \ref{cv2} in this section.  
+cross-validation is discussed in \autoref{cv} and \autoref{cv2} in this section.  
 
 \item \textit{ How do you compute the test error? What is it an estimate of? What would be the use of a validation
 set? } 
@@ -229,7 +229,7 @@ process as this would mean that the test set is used to learn from.
 test error shows an estimate of how well the model would perform for
 any kind of application.}
 
-In section \ref{sec:two} the test set was used to select a $k$.  This is a
+In \autoref{sec:two} the test set was used to select a $k$.  This is a
 typical example of something one should not do: the $k$ could be influenced
 by the test set.  
 
@@ -241,7 +241,7 @@ set.  Hopefully the results of these tests can be used to select those
 model and parameters which perform best, also on the training set and new 
 data in the application for which was learned.  
 If the test set was used as the validation set, such 
-as in section \ref{sec:two}, the test set could not be used to calculate a 
+as in \autoref{sec:two}, the test set could not be used to calculate a 
 true error rate because validating models is part of the training process.  
 
 \end{enumerate}
