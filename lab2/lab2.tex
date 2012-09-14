@@ -1,0 +1,73 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage{amsmath}
+\usepackage{catoptions}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\newcommand{\convolution}{\ensuremath{+\negmedspace\negmedspace\negmedspace\times}}
+\newcommand{\highlightColor}{red}
+
+\makeatletter
+%% Provide \Autoref; the \autoref with a printed capital
+\def\figureautorefname{figure}
+\def\tableautorefname{table}
+\def\partautorefname{part}
+\def\appendixautorefname{appendix}
+\def\equationautorefname{equation}
+\def\AMSautorefname{equation}
+\def\theoremautorefname{theorem}
+\def\enumerationautorefname{case}
+\def\Autoref#1{%
+  \begingroup
+  \edef\reserved@a{\cpttrimspaces{#1}}%
+  \ifcsndefTF{r@#1}{%
+    \xaftercsname{\expandafter\testreftype\@fourthoffive}
+      {r@\reserved@a}.\\{#1}%
+  }{%
+    \ref{#1}%
+  }%
+  \endgroup
+}
+\def\testreftype#1.#2\\#3{%
+  \ifcsndefTF{#1autorefname}{%
+    \def\reserved@a##1##2\@nil{%
+      \uppercase{\def\ref@name{##1}}%
+      \csn@edef{#1autorefname}{\ref@name##2}%
+      \autoref{#3}%
+    }%
+    \reserved@a#1\@nil
+  }{%
+    \autoref{#3}%
+  }%
+}
+
+
+\makeatother
+
+ 
+\author{Maarten Inja \and Patrick de Kok}
+\title{MLPR: Lab 2}
+
+\lstset{
+  language=Octave,
+  basicstyle=\footnotesize,
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  stepnumber=5,
+  showspaces=false,
+  showstringspaces=true
+  showtabs=false,
+  frame=single,
+  title=\lstname,
+  breaklines=true,
+}
+\begin{document}
+\maketitle
+
+\section{OH YEA}
+lets do this thing!
+
+\end{document}
