@@ -35,7 +35,7 @@ def presentre_str(text, regexps):
     Return a list consisting of 1s and 0s, representing a match for each
     regular expression in the text.
     """
-    return [num(bool(re.search(regexp, text))) for regexp in regexps]
+    return map(lambda regexp: NUM(bool(re.search(regexp, text))), regexps)
 
 
 
@@ -44,18 +44,16 @@ def countre(folder, regexps):
     Return a list of probabilities that the regexp occurs in a file, and the
     number of files inspected.
     """
-    filenames = os.listdir(folder)
-    filecount = len(filenames)
-    texts = [''.join(open(folder + os.sep + filename, 'r').readlines()) for filename in filenames]
+    filenames = get_files(folder)
+    file_count = len(filenames)
+    texts = [''.join(open(filename, 'r').readlines()) for filename in filenames]
     patterns = [re.compile(regexp) for regexp in regexps]
     match_counts = len(regexps) * [ZERO]
 
     for text in texts:
         match_counts = [curr + new for (curr, new) in zip(match_counts, presentre_str(text, patterns))]
 
-    match_counts = [count / filecount for count in match_counts]
-
-    return match_counts, filecount
+    return map(lambda match_count: match_count / file_count, match_counts), file_count
 
 
 
@@ -64,7 +62,7 @@ def count_words(directory):
     Return a defaultdict with words as keys and the number of occurences of
     a word in the files in the directory as value.
     """
-    word_list = defaultdict(num) 
+    word_list = defaultdict(NUM) 
     directory_content = os.listdir(directory)
     for f in directory_content:
         words = open(directory + os.sep + f, 'r').read().split(' ')
@@ -106,6 +104,12 @@ def dictsum(d1, d2, add_default=True):
         else:
             sumdict[key] = d2[key]
     return sumdict
+
+
+
+def get_files(folder):
+    return map(lambda filename: folder + os.sep + filename,
+            os.listdir(folder))
 
 
 
