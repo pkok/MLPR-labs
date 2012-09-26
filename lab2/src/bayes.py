@@ -4,8 +4,10 @@ Contains the code which is asked for in section 3 of assignment 2.
 Classes are represented by their folder paths.
 """
 import os
+from decimal import Decimal
 
 import toolkit
+
 
 TEST = 'test'
 TRAIN = 'train'
@@ -26,15 +28,14 @@ def instance_prob(instance, features, clss, train=True):
     ham or spam), p(x|Ck ) is then modelled as the probability of seeing
     specific keywords in the email.''
     """
-    folder = clss
-    if train:
-        folder += TRAIN
-    else:
-        folder += TEST
-    # this cant be right, countre can contain zero when a regular expression does not occur
-    countre_result = countre(folder, features)[0]
-    assert not(Decimal(0) in countre_result)
-    return map(lambda x, y: x / y, presentre(instance, features), countre_result)
+    folder = clss + TRAIN if train else clss + TEST
+
+    # this cant be right, countre can contain zero when a regular expression 
+    # does not occur
+    countre_result = toolkit.countre(folder, features)[0]
+    assert not(toolkit.ZERO in countre_result), "Regular expression does not occur, this will cause a divide by zero error" 
+
+    return map(lambda x, y: x / y, toolkit.presentre(instance, features), countre_result)
 
 
 
@@ -51,27 +52,29 @@ def clss_prob(clss, instance, features, train=True):
     dividing the number of messages of one kind by the total number of
     messages.
     """
-    ham_folder = ham
-    spam_folder = spam
+    ham_folder = HAM
+    spam_folder = SPAM
 
-    #if train:
-    #    ham_folder += TRAIN
-    #else:
-    #    ham_folder += TEST
     ham_folder += TRAIN if train else TEST
 
-    ham_prob = toolkit.NUM(len(get_files(ham_folder)))
-    spam_prob = toolkit.NUM(len(get_files(spam_folder)))
+    ham_prob = toolkit.NUM(len(toolkit.get_files(ham_folder)))
+    spam_prob = toolkit.NUM(len(toolkit.get_files(spam_folder)))
+
     file_count = ham_prob + spam_prob
     ham_prob /= file_count
     spam_prob /= file_count
 
     instance_ham_prob = instance_prob(instance, features, HAM, train)
-    instance_spam_prob = toolkit.ONE - instance_ham_prob
-    if clss == HAM:
-        return instance_ham_prob * ham_prob / class_prior_prob(clss, train)
-    return instance_spam_prob * spam_prob  / class_prior_prob(clss, train)
+    
+    instance_spam_prob = instance_prob(instance, features, SPAM, train)
+    print instance_ham_prob, instance_spam_prob
+    # or should this work?:
+    #instance_spam_prob = toolkit.ONE - instance_ham_prob
 
+    
+    #if clss == HAM:
+    #    return instance_ham_prob * ham_prob / class_prior_prob(clss, train)
+    #return instance_spam_prob * spam_prob  / class_prior_prob(clss, train)
 
 
 def class_prior_prob(clss, train=True):
@@ -88,3 +91,6 @@ def class_prior_prob(clss, train=True):
     if clss == HAM:
         return toolkit.NUM(0.7)
     return toolkit.ONE - class_prior_prob(clss, train)
+
+if __name__ == "__main__":
+    clss_prob(SPAM, 'spam/train/02', ["Africa"])
