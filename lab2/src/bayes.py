@@ -28,10 +28,25 @@ def instance_prob(instance, features, clss, train=True):
     ham or spam), p(x|Ck ) is then modelled as the probability of seeing
     specific keywords in the email.''
     """
+    return prod(instance_feature_prob(instance, features, clss, train=train))
+
+def instance_feature_prob(instance, features, clss, train=True):
+    """
+    Corresponds to [p(x_i | C_k) for x_i in x] from the assignment.
+    
+    The instance is a message, which is either of clss HAM or clss SPAM.
+    features is a collection of (compiled) regular expressions.  If applied to
+    the instance, we compute for every feature, if it occurs in the instance.
+    We divide that number by how many training/testing instances of the class
+    match against the feature.
+
+    ``The probability of an observation (i.e., an email) given the class (i.e., 
+    ham or spam), p(x|Ck ) is then modelled as the probability of seeing
+    specific keywords in the email.''
+    """
     folder = clss + TRAIN if train else clss + TEST
     countre_result = toolkit.countre(folder, features)[0]
-    feature_presence = toolkit.presentre(instance, features)
-
+    feature_presence = toolkit.presentre(instance, features) 
     return map(lambda c, p: 1 if c == toolkit.ZERO and p == toolkit.ZERO else pow(c, p) * pow(1 - c, 1 - p), countre_result, feature_presence)
 
 

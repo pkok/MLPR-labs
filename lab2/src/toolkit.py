@@ -121,8 +121,11 @@ def dictsum(d1, d2, add_default=True):
 
 
 def get_files(folder):
-    return map(lambda filename: folder + os.sep + filename,
-        os.listdir(folder))
+    return map(lambda filename: folder + os.sep + filename, os.listdir(folder))
+
+
+def prod(args):
+    return reduce(lambda x, y: x * y, args)
 
 
 
