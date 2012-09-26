@@ -29,13 +29,10 @@ def instance_prob(instance, features, clss, train=True):
     specific keywords in the email.''
     """
     folder = clss + TRAIN if train else clss + TEST
-
-    # this cant be right, countre can contain zero when a regular expression 
-    # does not occur
     countre_result = toolkit.countre(folder, features)[0]
-    assert not(toolkit.ZERO in countre_result), "Regular expression does not occur, this will cause a divide by zero error" 
+    feature_presence = toolkit.presentre(instance, features)
 
-    return map(lambda x, y: x / y, toolkit.presentre(instance, features), countre_result)
+    return map(lambda c, p: pow(c, p) * pow(1 - c, 1 - p), countre_result, feature_presence)
 
 
 
@@ -93,4 +90,5 @@ def class_prior_prob(clss, train=True):
     return toolkit.ONE - class_prior_prob(clss, train)
 
 if __name__ == "__main__":
-    clss_prob(SPAM, 'spam/train/02', ["Africa"])
+    #clss_prob(SPAM, 'spam/train/02', ["Africa"])
+    print instance_prob('spam/test/01', ['Africa', 'valued', 'good day'], SPAM)
