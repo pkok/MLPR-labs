@@ -28,6 +28,11 @@ ZERO = NUM(0)
 """Default flags for regular expressions."""
 RE_FLAGS = re.IGNORECASE
 
+"""Prior probability for HAM""" 
+PRIOR_HAM = NUM(0.7)
+"""Prior probability for SPAM""" 
+PRIOR_SPAM = NUM(1-PRIOR_HAM)
+
 def presentre(filename, regexps):
     """ 
     Return a list consisting of 1s and 0s, representing a match for each

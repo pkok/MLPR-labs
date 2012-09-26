@@ -96,10 +96,8 @@ def class_prior_prob(clss, train=True):
     are just guesses from Patrick.
     """
     if clss == HAM:
-        return toolkit.NUM(0.7)
-    # recursion! V
-    #return toolkit.ONE - class_prior_prob(clss, train) 
-    return toolkit.NUM(0.3) #define the probability in toolkit instead?
+        return toolkit.PRIOR_HAM
+    return toolkit.PRIOR_SPAM
 
 if __name__ == "__main__":
     print clss_prob(SPAM, 'spam/train/02', ["Africa"])
