@@ -21,13 +21,20 @@ def instance_prob(instance, features, clss, train=True):
     the instance, we compute for every feature, if it occurs in the instance.
     We divide that number by how many training/testing instances of the class
     match against the feature.
+
+    ``The probability of an observation (i.e., an email) given the class (i.e., 
+    ham or spam), p(x|Ck ) is then modelled as the probability of seeing
+    specific keywords in the email.''
     """
     folder = clss
     if train:
         folder += TRAIN
     else:
         folder += TEST
-    return map(lambda x, y: x / y, presentre(instance, features), countre(folder, features))
+    # this cant be right, countre can contain zero when a regular expression does not occur
+    countre_result = countre(folder, features)[0]
+    assert not(Decimal(0) in countre_result)
+    return map(lambda x, y: x / y, presentre(instance, features), countre_result)
 
 
 
@@ -46,10 +53,13 @@ def clss_prob(clss, instance, features, train=True):
     """
     ham_folder = ham
     spam_folder = spam
-    if train:
-        ham_folder += TRAIN
-    else:
-        ham_folder += TEST
+
+    #if train:
+    #    ham_folder += TRAIN
+    #else:
+    #    ham_folder += TEST
+    ham_folder += TRAIN if train else TEST
+
     ham_prob = toolkit.NUM(len(get_files(ham_folder)))
     spam_prob = toolkit.NUM(len(get_files(spam_folder)))
     file_count = ham_prob + spam_prob

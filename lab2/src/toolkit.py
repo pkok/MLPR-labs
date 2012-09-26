@@ -83,7 +83,9 @@ def merge_ws(s1, s2):
 
 
 def wordtable(s1, s2):
-    """ What should it do? Do we really need this?"""
+    """ What should it do? Do we really need this? I believe it translates
+    one data structure to another for Matlab. We do not use Matlab so
+    we should not need it. """
     pass
 
 
@@ -109,7 +111,7 @@ def dictsum(d1, d2, add_default=True):
 
 def get_files(folder):
     return map(lambda filename: folder + os.sep + filename,
-            os.listdir(folder))
+        os.listdir(folder))
 
 
 
