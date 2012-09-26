@@ -64,10 +64,8 @@ def clss_prob(clss, instance, features, train=True):
     dividing the number of messages of one kind by the total number of
     messages.
     """
-    ham_folder = HAM
-    spam_folder = SPAM
-
-    ham_folder += TRAIN if train else TEST
+    ham_folder = HAM + (TRAIN if train else TEST)
+    spam_folder = SPAM + (TRAIN if train else TEST)
 
     ham_prob = toolkit.NUM(len(toolkit.get_files(ham_folder)))
     spam_prob = toolkit.NUM(len(toolkit.get_files(spam_folder)))
