@@ -5,15 +5,19 @@ assignment 2.
 import os
 import re
 from collections import defaultdict
-from decimal import Decimal
 
 """ 
 Setting the default numeric type.  
 
-We use Decimal, as it has arbitrary precision (i.e., no floating point error,
-or intermediate rounding error). 
+We like to use arbitrary precision numbers, so we do not end up with floating
+point errors, or intermediate rounding errors.  gmpy is a non-default library,
+which supplies a much faster implementation of aribrary precision numbers,
+than decimal does. 
 """
-NUM = Decimal
+try:
+    from gmpy import mpf as NUM
+except ImportError:
+    from decimal import Decimal as NUM
 
 """The value "1" in the default numeric type."""
 ONE = NUM(1)
