@@ -28,7 +28,7 @@ def instance_prob(instance, features, clss, train=True):
     ham or spam), p(x|Ck ) is then modelled as the probability of seeing
     specific keywords in the email.''
     """
-    return prod(instance_feature_prob(instance, features, clss, train=train))
+    return toolkit.prod(instance_feature_prob(instance, features, clss, train=train))
 
 def instance_feature_prob(instance, features, clss, train=True):
     """
@@ -67,24 +67,20 @@ def clss_prob(clss, instance, features, train=True):
     ham_folder = HAM + (TRAIN if train else TEST)
     spam_folder = SPAM + (TRAIN if train else TEST)
 
+    # calculating P(C_k)
     ham_prob = toolkit.NUM(len(toolkit.get_files(ham_folder)))
     spam_prob = toolkit.NUM(len(toolkit.get_files(spam_folder)))
-
     file_count = ham_prob + spam_prob
     ham_prob /= file_count
-    spam_prob /= file_count
+    spam_prob /= file_count #(here we CAN do 1 - ham_prob, right?)
 
     instance_ham_prob = instance_prob(instance, features, HAM, train)
-    
     instance_spam_prob = instance_prob(instance, features, SPAM, train)
-    print instance_ham_prob, instance_spam_prob
-    # or should this work?:
-    #instance_spam_prob = toolkit.ONE - instance_ham_prob
 
     
-    #if clss == HAM:
-    #    return instance_ham_prob * ham_prob / class_prior_prob(clss, train)
-    #return instance_spam_prob * spam_prob  / class_prior_prob(clss, train)
+    if clss == HAM:
+        return instance_ham_prob * ham_prob / class_prior_prob(clss, train)
+    return instance_spam_prob * spam_prob  / class_prior_prob(clss, train)
 
 
 def class_prior_prob(clss, train=True):
@@ -100,8 +96,10 @@ def class_prior_prob(clss, train=True):
     """
     if clss == HAM:
         return toolkit.NUM(0.7)
-    return toolkit.ONE - class_prior_prob(clss, train)
+    # recursion! V
+    #return toolkit.ONE - class_prior_prob(clss, train) 
+    return toolkit.NUM(0.3) #define the probability in toolkit instead?
 
 if __name__ == "__main__":
-    #clss_prob(SPAM, 'spam/train/02', ["Africa"])
-    print instance_prob('spam/test/01', ['Africa', 'valued', 'good day'], SPAM)
+    print clss_prob(SPAM, 'spam/train/02', ["Africa"])
+    #print instance_prob('spam/test/01', ['Africa', 'valued', 'good day'], SPAM)
