@@ -32,7 +32,7 @@ def instance_prob(instance, features, clss, train=True):
     countre_result = toolkit.countre(folder, features)[0]
     feature_presence = toolkit.presentre(instance, features)
 
-    return map(lambda c, p: 1 if c == ZERO and p == ZERO else pow(c, p) * pow(1 - c, 1 - p), countre_result, feature_presence)
+    return map(lambda c, p: 1 if c == toolkit.ZERO and p == toolkit.ZERO else pow(c, p) * pow(1 - c, 1 - p), countre_result, feature_presence)
 
 
 
