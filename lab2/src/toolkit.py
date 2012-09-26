@@ -25,6 +25,9 @@ ONE = NUM(1)
 """The value "0" in the default numeric type."""
 ZERO = NUM(0)
 
+"""Default flags for regular expressions."""
+RE_FLAGS = re.IGNORECASE
+
 def presentre(filename, regexps):
     """ 
     Return a list consisting of 1s and 0s, representing a match for each
@@ -39,7 +42,11 @@ def presentre_str(text, regexps):
     Return a list consisting of 1s and 0s, representing a match for each
     regular expression in the text.
     """
-    return map(lambda regexp: NUM(bool(re.search(regexp, text))), regexps)
+    try:
+        return map(lambda regexp: NUM(bool(re.search(regexp, text, flags=RE_FLAGS))), regexps)
+    except ValueError:
+        # No regular expression flag can be passed if the regexp is already compiled.
+        return map(lambda regexp: NUM(bool(re.search(regexp, text, flags=0))), regexps)
 
 
 
@@ -51,7 +58,7 @@ def countre(folder, regexps):
     filenames = get_files(folder)
     file_count = len(filenames)
     texts = [''.join(open(filename, 'r').readlines()) for filename in filenames]
-    patterns = [re.compile(regexp) for regexp in regexps]
+    patterns = [re.compile(regexp, flags=RE_FLAGS) for regexp in regexps]
     match_counts = len(regexps) * [ZERO]
 
     for text in texts:
