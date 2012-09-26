@@ -74,6 +74,7 @@ def clss_prob(clss, instance, features, train=True):
     ham_prob /= file_count
     spam_prob /= file_count #(here we CAN do 1 - ham_prob, right?)
 
+    # getting P(x|C_k)
     instance_ham_prob = instance_prob(instance, features, HAM, train)
     instance_spam_prob = instance_prob(instance, features, SPAM, train)
 
