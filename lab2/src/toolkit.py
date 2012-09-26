@@ -28,10 +28,21 @@ ZERO = NUM(0)
 """Default flags for regular expressions."""
 RE_FLAGS = re.IGNORECASE
 
-"""Prior probability for HAM""" 
-PRIOR_HAM = NUM(0.7)
-"""Prior probability for SPAM""" 
-PRIOR_SPAM = NUM(1-PRIOR_HAM)
+"""
+Prior probability for SPAM.
+
+Based on the statistics the MAAWG collected over the third quarter of 2011.
+Source: http://www.maawg.org/sites/maawg/files/news/MAAWG_2011_Q1Q2Q3_Metrics_Report_15.pdf
+""" 
+PRIOR_SPAM = NUM("0.888")
+
+"""
+Prior probability for HAM.
+
+Based on the statistics the MAAWG collected over the third quarter of 2011.
+Source: http://www.maawg.org/sites/maawg/files/news/MAAWG_2011_Q1Q2Q3_Metrics_Report_15.pdf
+""" 
+PRIOR_HAM = ONE - PRIOR_SPAM
 
 def presentre(filename, regexps):
     """ 
