@@ -10,6 +10,8 @@
 \newcommand{\convolution}{\ensuremath{+\negmedspace\negmedspace\negmedspace\times}}
 \newcommand{\highlightColor}{red}
 
+\newcommand{\todo}[1]{\colorbox{red}{\color{white}#1}}
+
 \makeatletter
 %% Provide \Autoref; the \autoref with a printed capital
 \def\figureautorefname{figure}
@@ -70,22 +72,90 @@
 
 In this report, we describe how we have build a naive Bayes classifier, which will classify text messages as either ``spam'' (unwanted messages), or ham (wanted messages).  
 
-For the implementation we have used Python (version 2.7) with standard libraries.  We do not have a copy of Matlab on our PCs, and thus wanted to run the provided code on Octave, an free and open implementation of Matlab.  The provided code proved not to be compatible with the version of Octave included in our Linux repositories.  Although we have upgraded our Octave version from 3.2 to 3.6, as well as the I/O libraries, the code did not want to run.  After talking with Gwenn Englebienne, we have decided to implement the algorithm in Python. 
+For the implementation we have used Python (version 2.7) with standard libraries.  We do not have a copy of Matlab on our PCs, and thus wanted to run the provided code on Octave, an free and open implementation of Matlab.  The provided code proved not to be compatible with the version of Octave included in our Linux repositories.  Although we have upgraded our Octave version from 3.2 to 3.6, as well as the I/O libraries, the code did not want to run.  After talking with Gwenn Englebienne, we decided to implement the algorithm in Python. 
 
-\section*{Feature Selection}
-The feature vector $\vec{x}$ consists of those words which 
-help to distinguish between spam and ham emails the most. 
+\section{Feature Selection}
+The feature vector $\vec{x}$ consists of those words (expressed as 
+regular expression) which 
+help to distinguish between spam and ham emails the most. The Naive Bayes 
+classifier uses only words as features, this implies that we should pick
+these words carefully and correctly. Normal spam classifiers would use 
+other features as well. 
 
 In order to find these words we wrote some code in \textit{features.py} 
-to compute the probability of a word $w$ given a class. Using Bayes' rule
-we can determine this quite easy: $P(w|C_k) = \frac{P(C_k|w)P(w)}{P(C_k)}$.
+to compute the probability of a word $w$ given a class $C_k$. We can 
+determine this quite easy by dividing the number of occurrences of 
+$w$ by the total number of words in class $C_k$. We multiply this by 
+the prior $P(C_k)$, applying bayes' rule. 
 
-The prior $P(C_l)$ is based on the statistics the MAAWG collected over the 
-third quarter of 2011.
-\url{http://www.maawg.org/sites/maawg/files/news/MAAWG_2011_Q1Q2Q3_Metrics_Report_15.pdf}. This results in $P(SPAM) = 0.88$, and $P(HAM) = 0.12$.
+A likely value for the prior was found on the internet. It is 
+% $P(w|C_k) = \frac{P(C_k|w)P(w)}{P(C_k)}$.
+is based on the statistics the MAAWG collected over the 
+ third quarter of 2011.
+ \url{http://www.maawg.org/sites/maawg/files/news/MAAWG_2011_Q1Q2Q3_Metrics_Report_15.pdf}. The values are: $P(SPAM) = 0.88$, and $P(HAM) = 0.12$. These 
+values are latter used in the classification process as well.
 
+The words $w$, are trimmed of whitespace, transformed to lower case and 
+split on any non alpha character. 
 
-\section*{Naive Bayes classifier}
+We do this for both classes and end up with two lists that show how likely 
+a word is present in a class. To compare these lists we compiled one list
+that consisted of the probabilities of $P(w|SPAM) - P(w|HAM)$, sorted 
+(descended) this 
+list has the words likely for spam near the low indices, and the words likely
+for ham at the end of the list. 
 
+We then apply some common sense to pick those words that seem logically to 
+pick (i.e. not `his', but rather `pills').  
+
+Below are the first few lines of the output of \texttt{python features.py}, 
+notice how it also prints some more information from the data from which we 
+are inclined to conclude that SPAM mostly consist of emails with fewer words \footnote{If only we could apply different kind of features, besides words, as well}. 
+\begin{center}
+\begin{verbatim}
+spam files: 182 (44.61%)
+ham files: 226 (55.39%)
+
+spam words: 18927 (25.08%)
+ham words: 56552 (74.92%)
+
+Unique words: 17766
+
+SPAM
+'subject',      0.000280
+'meds',         0.000179
+'your',         0.000160
+'my',           0.000141
+'pills',        0.000112
+'funds',        0.000107
+'transfer',     0.000106
+'make',         0.000106
+'his',          0.000105
+\end{verbatim}
+\end{center}
+
+We experimented with some features, and also investigated some of the 
+messages. The resulting feature vector was: \todo{insert here}
+
+\section{Naive Bayes Classifier}
+The Naive Bayes Classifier works with the following equations: 
+
+\begin{equation}
+P(C_k|x) = \frac{P(x|C_k)p(C_k)}{\sum_j P(x|C_j)P(C_j)}
+\label{eq:1}
+\end{equation}
+
+\begin{equation}
+P(x|C_k)= \prod_{i=1}^d \mu^{x_i}_{i, k}(1 - \mu_{i,k})^{1-x_i}
+\label{eq:2}
+\end{equation}
+
+These are implemented in \texttt{bayes.py}. 
+
+% $\mu^{i,k}$ is the chance for word $x_i$ given class $C_k$ and can 
+% easily be calculated by dividing the number of emails in which 
+% $x_i$ occurs by the total amount of emails in $C-k$.  \ref{eq:2}
+
+\section{Evaluation}
 
 \end{document}
