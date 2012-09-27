@@ -89,8 +89,7 @@ def class_prior_prob(clss, train=True):
     messages, as that might not represent the real probability.  The samples
     might be drawn from different distributions.
 
-    We still have to collect this data from a better statistic.  These numbers
-    are just guesses from Patrick.
+    We still have to collect this data from a better statistic.
     """
     if clss == HAM:
         return toolkit.PRIOR_HAM
