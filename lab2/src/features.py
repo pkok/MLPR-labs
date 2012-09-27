@@ -7,11 +7,13 @@ This comprises section 2 of lab assignment 2.
 import operator
 
 import toolkit
+import re
 
 def strip_word(word):
     w = word.lower().strip()
-    w = "".join(filter(lambda x: x.isalpha(), w))
-    return w
+    #w = "".join(filter(lambda x: x.isalpha(), w))
+    w = re.sub(r'[\W_\d]+', ' ', w)
+    return w.split(' ')
 
 
 def compare_words(n):
@@ -55,19 +57,26 @@ def compare_words(n):
     #print_dict(sorted_spam_words[1:n+1]) # }}}
 
     # create a list containing all unique words
+    #words = []
+    #for w in ham_words.iterkeys():
+    #    words.extend(strip_word(w))
+    #for w in spam_words.iterkeys():
+    #    words.extend(strip_word(w))
+
     words = ham_words.keys()
     words.extend(filter(lambda x: not(x in words), spam_words.iterkeys()))
     print "Unique words: %d\n" % len(words)
 
-
     # create a dictionairy with all the words, the values are tuples
     # of the percentage of words for (spam, ham). 
     words_dict = {}
-    for w in words:
-        words_dict[strip_word(w)] = map(lambda x, y: x * toolkit.PRIOR_SPAM + 
-            y * toolkit.PRIOR_HAM, 
-            words_dict.get(strip_word(w), (0, 0)), (spam_words.get(w, 0) /
-            number_of_spam_words, ham_words.get(w, 0)/number_of_ham_words))
+    for w0 in words:
+        ws = strip_word(w0)
+        for w1 in ws:
+            words_dict[w1] = map(lambda x, y: x * toolkit.PRIOR_SPAM + 
+                y * toolkit.PRIOR_HAM, 
+                words_dict.get(w1, (0, 0)), (spam_words.get(w0, 0) /
+                number_of_spam_words, ham_words.get(w0, 0)/number_of_ham_words))
   
     # find out which words are enthousiastically represented in ham and spam
     ratio_dict = {}
@@ -78,8 +87,19 @@ def compare_words(n):
     print "SPAM"
     for sl in ratio_dict:
         print "'%s',\t\t%f" % (sl[0], sl[1])
-    print "HAM"
- 
+    print "HAM\n\n"
+
+    #print "Words in SPAM not in HAM:\n------------------------"
+    ##print_list()
+    #print "Words in HAM not in SPAM:\n------------------------"
+    ##print_list(filter(lambda x: x not in spam_words.keys(), ham_words.keys()))
+    #print len(filter(lambda x: x not in ham_words.keys(), spam_words.keys()))
+    #print len(filter(lambda x: x not in spam_words.keys(), ham_words.keys()))
+    
+
+def print_list(l):
+    for x in l:
+        print l 
 
 def print_dict(sorted_list):
     for sl in sorted_list:
