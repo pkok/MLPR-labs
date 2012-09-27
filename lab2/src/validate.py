@@ -53,6 +53,7 @@ def validate_classification(roc_step=toolkit.NUM('0.001')):
         roc.append((false[threshold][bayes.SPAM] / ham_count,
             correct[threshold][bayes.SPAM] / spam_count))
         threshold += roc_step
+    roc.reverse()
     return correct, false, roc
 
 
