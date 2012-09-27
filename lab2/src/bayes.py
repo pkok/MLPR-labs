@@ -20,9 +20,9 @@ def classify(filename, features, threshold):
     Returns SPAM for spam, HAM for ham. """
     pHamF = clss_prob(HAM, filename, features, smoothing=toolkit.ONE)
     pSpamF = clss_prob(SPAM, filename, features, smoothing=toolkit.ONE)
-    if (pSpamF - pHamF) > threshold:
-        return HAM
-    return SPAM
+    if (pSpamF > threshold):
+        return SPAM#, pSpamF, pHamF, pSpamF+pHamF
+    return HAM#, pSpamF, pHamF, pSpamF+pHamF
 
 
 def instance_prob(instance, features, clss, train=True, smoothing=toolkit.ZERO):
@@ -76,9 +76,14 @@ def clss_prob(clss, instance, features, train=True, smoothing=toolkit.ZERO):
     dividing the number of messages of one kind by the total number of
     messages.
     """
-    prob_instance = instance_prob(instance, features, clss, train=train, smoothing=smoothing)
+    pxHam = instance_prob(instance, features, HAM, train=train, smoothing=smoothing)
+    pxHam *= class_prior_prob(HAM)
+    pxSpam = instance_prob(instance, features, SPAM, train=train, smoothing=smoothing)
+    pxSpam *= class_prior_prob(SPAM)
 
-    return prob_instance * class_prior_prob(clss)
+    if (clss == HAM):
+        return pxHam / (pxHam + pxSpam)
+    return pxSpam / (pxHam + pxSpam)
 
 
 def class_prior_prob(clss, train=True):
