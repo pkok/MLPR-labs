@@ -14,16 +14,15 @@ HAM = os.curdir + os.sep + 'ham' + os.sep
 SPAM = os.curdir + os.sep + 'spam' + os.sep
 
 
-def classify(filename):
-    return classify_str(file_to_str(filename))
-
-
-def classify_str(instance):
-
+def classify(filename, features):
+    pHamF = clss_prob(HAM, filename, smoothing=toolkit.ONE)
+    pSpamF = clss_prob(SPAM, filename, smoothing=toolkit.ONE)
+    if pHamF > pSpamF:
+        return HAM
     return SPAM
 
 
-def instance_prob(instance, features, clss, train=True, smoothing=0):
+def instance_prob(instance, features, clss, train=True, smoothing=toolkit.ZERO):
     """
     Corresponds to p(x | C_k) from the assignment.
     
@@ -41,7 +40,7 @@ def instance_prob(instance, features, clss, train=True, smoothing=0):
         train=train, smoothing=smoothing))
 
 
-def instance_feature_prob(instance, features, clss, train=True, smoothing=0):
+def instance_feature_prob(instance, features, clss, train=True, smoothing=toolkit.ZERO):
     """
     Corresponds to [p(x_i | C_k) for x_i in x] from the assignment.
     
@@ -61,9 +60,9 @@ def instance_feature_prob(instance, features, clss, train=True, smoothing=0):
     return map(lambda c, p: 1 if c == toolkit.ZERO and p == toolkit.ZERO else pow(c, p) * pow(1 - c, 1 - p), countre_result, feature_presence)
 
 
-def clss_prob(clss, instance, features, train=True):
+def clss_prob(clss, instance, features, train=True, smoothing=toolkit.ZERO):
     """
-    Corresponds to p(C_k | x) from the assignment.
+    Corresponds to p(C_k | x) * p(x) from the assignment.
 
     This is computed with Bayes' theorem:
         p(C_k | x) = p(x | C_k) p(C_k) / p(x)
@@ -74,23 +73,9 @@ def clss_prob(clss, instance, features, train=True):
     dividing the number of messages of one kind by the total number of
     messages.
     """
-    ham_folder = HAM + (TRAIN if train else TEST)
-    spam_folder = SPAM + (TRAIN if train else TEST)
+    prob_instance = instance_prob(instance, features, clss, train=train, smoothing=smoothing)
 
-    # calculating P(C_k)
-    ham_prob = toolkit.NUM(len(toolkit.get_files(ham_folder)))
-    spam_prob = toolkit.NUM(len(toolkit.get_files(spam_folder)))
-    file_count = ham_prob + spam_prob
-    ham_prob /= file_count
-    spam_prob /= file_count #(here we CAN do 1 - ham_prob, right?)
-
-    # getting P(x|C_k)
-    instance_ham_prob = instance_prob(instance, features, HAM, train)
-    instance_spam_prob = instance_prob(instance, features, SPAM, train)
-    
-    if clss == HAM:
-        return instance_ham_prob * ham_prob / class_prior_prob(clss, train)
-    return instance_spam_prob * spam_prob  / class_prior_prob(clss, train)
+    return prob_instance * class_prior_prob(clss)
 
 
 def class_prior_prob(clss, train=True):
