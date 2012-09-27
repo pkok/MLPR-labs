@@ -134,7 +134,10 @@ SPAM
 \end{center}
 
 We experimented with some features, and also investigated some of the 
-messages. The resulting feature vector was: \todo{insert here}
+messages. The resulting feature vector was: 
+\['subject', 'meds', 'pills', 'funds', 'transfer', 'make', 'save', 'viagra', 'replica', 'http', 'www'\].
+
+\todo{insert here}
 
 \section{Naive Bayes Classifier}
 The Naive Bayes Classifier works with the following equations: 
@@ -150,6 +153,9 @@ P(x|C_k)= \prod_{i=1}^d \mu^{x_i}_{i, k}(1 - \mu_{i,k})^{1-x_i}
 \end{equation}
 
 These are implemented in \texttt{bayes.py}. 
+
+Laplace smoothing was used to make sure one zero occurrence did not made the
+product for the entire probability zero as well. 
 
 % $\mu^{i,k}$ is the chance for word $x_i$ given class $C_k$ and can 
 % easily be calculated by dividing the number of emails in which 
