@@ -13,15 +13,17 @@ import toolkit
 
 def validate_classification(roc_step=toolkit.NUM('0.001')):
     """Compute the ROC."""
-    correct = defaultdict(lambda: defaultdict(toolkit.NUM))
-    false = defaultdict(lambda: defaultdict(toolkit.NUM))
+    correct = defaultdict(lambda: defaultdict(lambda:toolkit.NUM(0)))
+    false = defaultdict(lambda: defaultdict(lambda:toolkit.NUM(0)))
     roc = list()
 
     # Compute best features.
+    print "Computing the 300 most characteristic features"
+    print "This is done by maximizing abs(p(HAM | word) - p(SPAM | word))"
+    print ""
     best_features = features.best_features(300)
     for feature, prob in best_features:
-        print feature, "     ", prob
-    best_features = map(operator.itemgetter(0), best_features)
+        best_features = map(operator.itemgetter(0), best_features)
 
     ham_files = toolkit.get_files(bayes.HAM + bayes.TEST)
     spam_files = toolkit.get_files(bayes.SPAM + bayes.TEST)
@@ -56,7 +58,7 @@ def validate_classification(roc_step=toolkit.NUM('0.001')):
 
 
 if __name__ == "__main__":
-    correct, false, roc = validate_classification(toolkit.NUM('0.1'))
+    correct, false, roc = validate_classification(toolkit.NUM('0.01'))
     print "\n\n"
     for element in roc:
         print element
