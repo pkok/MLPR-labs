@@ -18,6 +18,7 @@ try:
     from gmpy import mpf as NUM
 except ImportError:
     from decimal import Decimal as NUM
+NUM=float
 
 """The value "1" in the default numeric type."""
 ONE = NUM(1)
@@ -107,14 +108,11 @@ def count_words(directory):
     """
     if not previous_count_word_calls.has_key(directory):
         word_list = defaultdict(lambda: NUM(0)) 
-        directory_content = os.listdir(directory)
-        for f in directory_content:
-            words = open(directory + os.sep + f, 'r').read().split(' ')
+        for filename in get_files(directory):
+            words = re.split('[^a-z]', file_to_str(filename).lower())
+            words = filter(lambda x: len(x), words)
             for w in words:
-                w = filter(lambda x: x in 'abcdefghijklmnopqrstuvwxyz',
-                        w.lower())
-                if w:
-                    word_list[w] += ONE 
+                word_list[w] += ONE 
         previous_count_word_calls[directory] = word_list
     return previous_count_word_calls[directory]
 
