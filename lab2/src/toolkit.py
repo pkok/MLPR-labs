@@ -44,44 +44,50 @@ Source: http://www.maawg.org/sites/maawg/files/news/MAAWG_2011_Q1Q2Q3_Metrics_Re
 """ 
 PRIOR_HAM = ONE - PRIOR_SPAM
 
-def presentre(filename, regexps):
+
+def presentre(filename, regexps, compiled=False):
     """ 
     Return a list consisting of 1s and 0s, representing a match for each
     regular expression in the file.
     """
-    return presentre_str(''.join(open(filename, 'r').readlines()), regexps)
+    return presentre_str(file_to_str(filename), regexps, compiled=compiled)
 
 
-
-def presentre_str(text, regexps):
+def presentre_str(text, regexps, compiled=False):
     """ 
     Return a list consisting of 1s and 0s, representing a match for each
     regular expression in the text.
     """
-    try:
-        return map(lambda regexp: NUM(bool(re.search(regexp, text, flags=RE_FLAGS))), regexps)
-    except ValueError:
-        # No regular expression flag can be passed if the regexp is already compiled.
-        return map(lambda regexp: NUM(bool(re.search(regexp, text, flags=0))), regexps)
+    # No regular expression flag can be passed if the regexp is already compiled.
+    flags = 0
+    if compiled:
+        flags = RE_FLAGS
+    return map(lambda regexp: NUM(bool(re.search(regexp, text, flags=flags))), regexps)
 
 
-
-def countre(folder, regexps):
+def countre(folder, regexps, compiled=False, smoothing=0):
     """ 
     Return a list of probabilities that the regexp occurs in a file, and the
     number of files inspected.
+
+    The values can be smoothed, according to Laplace smoothing.
     """
     filenames = get_files(folder)
     file_count = len(filenames)
-    texts = [''.join(open(filename, 'r').readlines()) for filename in filenames]
-    patterns = [re.compile(regexp, flags=RE_FLAGS) for regexp in regexps]
+    texts = map(file_to_str, filenames)
+    if compiled:
+        patterns = regexps
+    else:
+        patterns = map(lambda r: re.compile(r, flags=RE_FLAGS), regexps)
     match_counts = len(regexps) * [ZERO]
 
     for text in texts:
-        match_counts = [curr + new for (curr, new) in zip(match_counts, presentre_str(text, patterns))]
-
-    return map(lambda match_count: match_count / file_count, match_counts), file_count
-
+        match_counts = map(sum, zip(match_counts, presentre_str(text, patterns)))
+    
+    def smooth_prob(match_count):
+        # TODO: Should we use len(regexps), or the number of classes?
+        return (match_count + smoothing) / (file_count + len(regexps) * smoothing)
+    return map(smooth_prob, match_counts), file_count
 
 
 def count_words(directory):
@@ -98,7 +104,6 @@ def count_words(directory):
     return word_list
 
 
-
 def merge_ws(s1, s2):
     """ 
     "Merge word structs."
@@ -108,13 +113,11 @@ def merge_ws(s1, s2):
     return dictsum(s1, s2, False)
 
 
-
 def wordtable(s1, s2):
     """ What should it do? Do we really need this? I believe it translates
     one data structure to another for Matlab. We do not use Matlab so
     we should not need it. """
     pass
-
 
 
 def dictsum(d1, d2, add_default=True):
@@ -126,7 +129,13 @@ def dictsum(d1, d2, add_default=True):
     """
     sumdict = d1.copy()
     if add_default:
-        sumdict.default_factory = lambda: d1.default_factory + d2.default_factory
+        sumdict.default_factory = toolkit.NUM
+        if hasattr(d1, 'default_factory') and hasattr(d2, 'default_factory'):
+            sumdict.default_factory = lambda: d1.default_factory() + d2.default_factory()
+        elif hasattr(d1, 'default_factory'):
+            sumdict.default_factory = lambda: d1.default_factory()
+        elif hasattr(d2, 'default_factory'):
+            sumdict.default_factory = lambda: d2.default_factory()
     for key in d2.iterkeys():
         if add_default or sumdict.has_key(key):
             sumdict[key] += d2[key]
@@ -135,14 +144,19 @@ def dictsum(d1, d2, add_default=True):
     return sumdict
 
 
-
 def get_files(folder):
+    """List all files in a folder."""
     return map(lambda filename: folder + os.sep + filename, os.listdir(folder))
 
 
-def prod(args):
-    return reduce(lambda x, y: x * y, args)
+def file_to_str(filename):
+    """Return the file contents of filename as a single string."""
+    return ''.join(open(filename, 'r').readlines())
 
+
+def prod(args):
+    """Compute the product of the elements of the argument collection."""
+    return reduce(lambda x, y: x * y, args)
 
 
 if __name__ == "__main__":
