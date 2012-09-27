@@ -9,6 +9,10 @@ import operator
 import toolkit
 import re
 
+def get_features():
+    """ Returns a predetermined list of features in regular expressions"""
+    return ['subject', 'meds', 'pills', 'funds', 'transfer', 'make', 'save', 'viagra', 'replica', 'http', 'www']
+
 def strip_word(word):
     w = word.lower().strip()
     #w = "".join(filter(lambda x: x.isalpha(), w))
