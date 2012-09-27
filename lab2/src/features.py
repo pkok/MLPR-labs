@@ -8,6 +8,12 @@ import operator
 
 import toolkit
 
+def strip_word(word):
+    w = word.lower().strip()
+    w = "".join(filter(lambda x: x.isalpha(), w))
+    return w
+
+
 def compare_words(n):
     """ Attempts to analyse the spam and ham data to find good
     features and tries to print relevant information about the data """
@@ -38,7 +44,7 @@ def compare_words(n):
     print 'spam files: %d (%.2f%%)' % (number_of_spam_files, spam_files_percentage)
     print 'ham files: %d (%.2f%%)\n' % (number_of_ham_files, ham_files_percentage)
     print 'spam words: %d (%.2f%%)' % (number_of_spam_words, spam_words_percentage)
-    print 'ham words: %d (%.2f%%)' % (number_of_ham_words, ham_words_percentage) 
+    print 'ham words: %d (%.2f%%)\n' % (number_of_ham_words, ham_words_percentage) 
 
     ## sort dictionaries
     #sorted_spam_words = sorted(spam_words.iteritems(), key=operator.itemgetter(1), reverse=True)
@@ -51,20 +57,28 @@ def compare_words(n):
     # create a list containing all unique words
     words = ham_words.keys()
     words.extend(filter(lambda x: not(x in words), spam_words.iterkeys()))
-    print "Unique words: ", len(words)
+    print "Unique words: %d\n" % len(words)
+
 
     # create a dictionairy with all the words, the values are tuples
     # of the percentage of words for (spam, ham). 
     words_dict = {}
     for w in words:
-        words_dict[w] = (spam_words.get(w, 0)/number_of_spam_words, 
-            ham_words.get(w, 0)/number_of_ham_words)
+        words_dict[strip_word(w)] = map(lambda x, y: x * toolkit.PRIOR_SPAM + 
+            y * toolkit.PRIOR_HAM, 
+            words_dict.get(strip_word(w), (0, 0)), (spam_words.get(w, 0) /
+            number_of_spam_words, ham_words.get(w, 0)/number_of_ham_words))
   
     # find out which words are enthousiastically represented in ham and spam
     ratio_dict = {}
-    for item in words_dict:
-        ratio_dict[item[0]] = item[1][0] / item[1][1]
-
+    for item in words_dict.items():
+        ratio_dict[item[0]] = item[1][0] - item[1][1] 
+    ratio_dict = sorted(ratio_dict.iteritems(), key=operator.itemgetter(1), reverse=True)
+    
+    print "SPAM"
+    for sl in ratio_dict:
+        print "'%s',\t\t%f" % (sl[0], sl[1])
+    print "HAM"
  
 
 def print_dict(sorted_list):
@@ -72,4 +86,4 @@ def print_dict(sorted_list):
         print "'", sl[0], "'\t\t", sl[1]
 
 if __name__ == "__main__":
-    compare_words(20)
+    compare_words(50)
