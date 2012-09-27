@@ -4,6 +4,7 @@ Validation algorithms for classifiers.
 This comprises section 4 of lab assignment 2.
 """
 from collections import defaultdict
+from time import gmtime, strftime
 import operator
 
 import bayes
@@ -22,8 +23,7 @@ def validate_classification(roc_step=toolkit.NUM('0.001')):
     print "This is done by maximizing abs(p(HAM | word) - p(SPAM | word))"
     print ""
     best_features = features.best_features(300)
-    for feature, prob in best_features:
-        best_features = map(operator.itemgetter(0), best_features)
+    best_features = map(operator.itemgetter(0), best_features)
 
     ham_files = toolkit.get_files(bayes.HAM + bayes.TEST)
     spam_files = toolkit.get_files(bayes.SPAM + bayes.TEST)
@@ -37,11 +37,11 @@ def validate_classification(roc_step=toolkit.NUM('0.001')):
     from math import log, ceil
     total_count = ham_count + spam_count
     total_digits = ceil(log(total_count, 10))
-    print_msg = "Processing file (%%0%dd/%d): %%s " % (total_digits, total_count)
+    print_msg = "%%s Processing file (%%0%dd/%d): %%s " % (total_digits, total_count)
     count = 0
     for filename, clss in test_samples:
         count += 1
-        print print_msg % (count, filename)
+        print print_msg % (strftime("%H:%M:%S", gmtime()), count, filename)
         threshold = toolkit.ZERO
         while threshold <= toolkit.ONE:
             is_correct = int(bayes.classify(filename, best_features, threshold) == clss)
@@ -59,6 +59,8 @@ def validate_classification(roc_step=toolkit.NUM('0.001')):
 
 if __name__ == "__main__":
     correct, false, roc = validate_classification(toolkit.NUM('0.01'))
-    print "\n\n======= ROC ======"
+    print "\n\n======= ROC IS PRINTED TO 'roc.dat' ======="
+    f = open('roc.dat', 'w')
     for element in roc:
-        print element
+        f.write(str(element[0]) + ", " + str(element[1]) + "\n")
+    f.close()
