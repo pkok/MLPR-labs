@@ -20,7 +20,7 @@ def classify(filename, features, threshold):
     Returns SPAM for spam, HAM for ham. """
     pHamF = clss_prob(HAM, filename, features, smoothing=toolkit.ONE)
     pSpamF = clss_prob(SPAM, filename, features, smoothing=toolkit.ONE)
-    if (pHamF - pSpamF) > threshold:
+    if (pSpamF - pHamF) > threshold:
         return HAM
     return SPAM
 

@@ -40,10 +40,11 @@ def validate_classification(roc_step=toolkit.NUM('0.001')):
         while threshold < toolkit.ONE:
             is_correct = int(bayes.classify(filename, features, threshold) == clss)
             correct[threshold][clss] += is_correct
-            false[threshold][clss] += (1 - is_correct)
+            false[threshold][clss] += (toolkit.NUM(1) - is_correct)
             threshold += roc_step
     threshold = toolkit.ZERO
     while threshold < toolkit.ONE:
+        print false[threshold][bayes.SPAM], "--", correct[threshold][bayes.SPAM]
         roc.append((false[threshold][bayes.SPAM] / ham_count,
             correct[threshold][bayes.SPAM] / spam_count))
         threshold += roc_step
