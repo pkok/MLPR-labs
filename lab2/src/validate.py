@@ -50,7 +50,6 @@ def validate_classification(roc_step=toolkit.NUM('0.001')):
             threshold += roc_step
     threshold = toolkit.ZERO
     while threshold <= toolkit.ONE:
-        print false[threshold][bayes.SPAM], "--", correct[threshold][bayes.SPAM]
         roc.append((false[threshold][bayes.SPAM] / ham_count,
             correct[threshold][bayes.SPAM] / spam_count))
         threshold += roc_step
@@ -59,6 +58,6 @@ def validate_classification(roc_step=toolkit.NUM('0.001')):
 
 if __name__ == "__main__":
     correct, false, roc = validate_classification(toolkit.NUM('0.01'))
-    print "\n\n"
+    print "\n\n======= ROC ======"
     for element in roc:
         print element
