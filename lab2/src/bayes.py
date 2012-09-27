@@ -17,7 +17,7 @@ SPAM = os.curdir + os.sep + 'spam' + os.sep
 def classify(filename, features, threshold):
     pHamF = clss_prob(HAM, filename, features, smoothing=toolkit.ONE)
     pSpamF = clss_prob(SPAM, filename, features, smoothing=toolkit.ONE)
-    if (pHamF - pSpamF) > threshold:
+    if (pSpamF - pHamF) > threshold:
         return HAM
     return SPAM
 
