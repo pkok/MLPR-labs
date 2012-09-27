@@ -70,21 +70,20 @@
 \begin{document}
 \maketitle
 
-In this report, we describe how we have build a naive Bayes classifier, which will classify text messages as either ``spam'' (unwanted messages), or ham (wanted messages).  
+In this report we describe how we have build a naive Bayes classifier, which will classify text messages as either ``spam'' (unwanted messages), or ham (wanted messages).  
 
 For the implementation we have used Python (version 2.7) with standard libraries.  We do not have a copy of Matlab on our PCs, and thus wanted to run the provided code on Octave, an free and open implementation of Matlab.  The provided code proved not to be compatible with the version of Octave included in our Linux repositories.  Although we have upgraded our Octave version from 3.2 to 3.6, as well as the I/O libraries, the code did not want to run.  After talking with Gwenn Englebienne, we decided to implement the algorithm in Python. 
 
 \section{Feature Selection}
 The feature vector $\vec{x}$ consists of those words (expressed as 
 regular expression) which 
-help to distinguish between spam and ham emails the most. The Naive Bayes 
-classifier uses only words as features, this implies that we should pick
-these words carefully and correctly. Normal spam classifiers would use 
-other features as well. 
+help to distinguish between spam and ham emails the most. 
 
-In order to find these words we wrote some code in \textit{features.py} 
+The naive Bayes classifier uses only words as features. This implies that we should pick these words carefully and correctly. More advanced spam classifiers would use other features as well, such as those that can be collected from the header of an email.
+
+In order to find these words we wrote some code in \texttt{features.py} 
 to compute the probability of a word $w$ given a class $C_k$. We can 
-determine this quite easy by dividing the number of occurrences of 
+determine this quite easily by dividing the number of occurrences of 
 $w$ by the total number of words in class $C_k$. We multiply this by 
 the prior $P(C_k)$, applying bayes' rule. 
 
