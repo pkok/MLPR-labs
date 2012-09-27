@@ -106,7 +106,7 @@ def count_words(directory):
     a word in the files in the directory as value.
     """
     if not previous_count_word_calls.has_key(directory):
-        word_list = defaultdict(NUM) 
+        word_list = defaultdict(lambda: NUM(0)) 
         directory_content = os.listdir(directory)
         for f in directory_content:
             words = open(directory + os.sep + f, 'r').read().split(' ')
