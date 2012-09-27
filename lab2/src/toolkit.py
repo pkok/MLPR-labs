@@ -53,16 +53,20 @@ def presentre(filename, regexps, compiled=False):
     return presentre_str(file_to_str(filename), regexps, compiled=compiled)
 
 
+previous_presentre_calls = {}
 def presentre_str(text, regexps, compiled=False):
     """ 
     Return a list consisting of 1s and 0s, representing a match for each
     regular expression in the text.
     """
     # No regular expression flag can be passed if the regexp is already compiled.
-    flags = 0
-    if compiled:
-        flags = RE_FLAGS
-    return map(lambda regexp: NUM(bool(re.search(regexp, text, flags=flags))), regexps)
+    regexps = tuple(regexps)
+    if not previous_presentre_calls.has_key((text, regexps, compiled)):
+        flags = 0
+        if compiled:
+            flags = RE_FLAGS
+        previous_presentre_calls[(text, regexps, compiled)] = map(lambda regexp: NUM(bool(re.search(regexp, text, flags=flags))), regexps)
+    return previous_presentre_calls[(text, regexps, compiled)]
 
 
 previous_countre_calls = {}
@@ -95,21 +99,24 @@ def countre(folder, regexps, compiled=False, smoothing=0):
     return previous_countre_calls[(folder, regexps, compiled, smoothing)]
 
 
+previous_count_word_calls = {}
 def count_words(directory):
     """
     Return a defaultdict with words as keys and the number of occurences of
     a word in the files in the directory as value.
     """
-    word_list = defaultdict(NUM) 
-    directory_content = os.listdir(directory)
-    for f in directory_content:
-        words = open(directory + os.sep + f, 'r').read().split(' ')
-        for w in words:
-            w = filter(lambda x: x in 'abcdefghijklmnopqrstuvwxyz',
-                    w.lower())
-            if w:
-                word_list[w] += ONE 
-    return word_list
+    if not previous_count_word_calls.has_key(directory):
+        word_list = defaultdict(NUM) 
+        directory_content = os.listdir(directory)
+        for f in directory_content:
+            words = open(directory + os.sep + f, 'r').read().split(' ')
+            for w in words:
+                w = filter(lambda x: x in 'abcdefghijklmnopqrstuvwxyz',
+                        w.lower())
+                if w:
+                    word_list[w] += ONE 
+        previous_count_word_calls[directory] = word_list
+    return previous_count_word_calls[directory]
 
 
 def merge_ws(s1, s2):
@@ -157,9 +164,12 @@ def get_files(folder):
     return map(lambda filename: folder + os.sep + filename, os.listdir(folder))
 
 
+file_contents = {}
 def file_to_str(filename):
     """Return the file contents of filename as a single string."""
-    return ''.join(open(filename, 'r').readlines())
+    if not file_contents.has_key(filename):
+        file_contents[filename] = open(filename, 'r').read()
+    return file_contents[filename]
 
 
 def prod(args):
