@@ -4,10 +4,12 @@ Feature selection algorithms.
 This comprises section 2 of lab assignment 2.
 """
 
-import operator
-
-import toolkit
 import re
+import operator
+from collections import defaultdict
+
+import bayes
+import toolkit
 
 def get_features():
     """ Returns a predetermined list of features in regular expressions"""
@@ -19,14 +21,13 @@ def strip_word(word):
     w = re.sub(r'[\W_\d]+', ' ', w)
     return w.split(' ')
 
-
 def compare_words(n):
     """ Attempts to analyse the spam and ham data to find good
     features and tries to print relevant information about the data """
 
     # set folders
-    spam_folder = 'spam/train'
-    ham_folder = 'ham/train'
+    spam_folder = bayes.SPAM + bayes.TRAIN
+    ham_folder = bayes.HAM + bayes.TRAIN
 
     # get all the words in the folders
     spam_words = toolkit.count_words(spam_folder)
@@ -77,21 +78,21 @@ def compare_words(n):
     for w0 in words:
         ws = strip_word(w0)
         for w1 in ws:
-            words_dict[w1] = map(lambda x, y: x * toolkit.PRIOR_SPAM + 
-                y * toolkit.PRIOR_HAM, 
+            words_dict[w1] = map(lambda x, y: x * toolkit.PRIOR_SPAM + y * toolkit.PRIOR_HAM, 
                 words_dict.get(w1, (0, 0)), (spam_words.get(w0, 0) /
                 number_of_spam_words, ham_words.get(w0, 0)/number_of_ham_words))
   
     # find out which words are enthousiastically represented in ham and spam
     ratio_dict = {}
-    for item in words_dict.items():
-        ratio_dict[item[0]] = item[1][0] - item[1][1] 
+    for word, probs in words_dict.items():
+        ratio_dict[word] = abs(probs[0] - probs[1])
     ratio_dict = sorted(ratio_dict.iteritems(), key=operator.itemgetter(1), reverse=True)
     
     print "SPAM"
     for sl in ratio_dict:
         print "'%s',\t\t%f" % (sl[0], sl[1])
     print "HAM\n\n"
+    return ratio_dict[:n]
 
     #print "Words in SPAM not in HAM:\n------------------------"
     ##print_list()
@@ -101,6 +102,23 @@ def compare_words(n):
     #print len(filter(lambda x: x not in spam_words.keys(), ham_words.keys()))
     
 
+def best_features(feature_count):
+    ham_words = toolkit.count_words(bayes.HAM + bayes.TRAIN)
+    spam_words = toolkit.count_words(bayes.SPAM + bayes.TRAIN)
+    total_ham_words = sum(ham_words.itervalues())
+    total_spam_words = sum(spam_words.itervalues())
+    ham_scale = toolkit.PRIOR_HAM / total_ham_words
+    spam_scale = toolkit.PRIOR_SPAM / total_spam_words
+    for word in ham_words.iterkeys():
+        ham_words[word] *= ham_scale
+    for word in spam_words.iterkeys():
+        spam_words[word] *= spam_scale
+    total_words = toolkit.dictsum(ham_words, spam_words)
+    bigdiff = defaultdict(spam_words.default_factory, spam_words)
+    for word in ham_words.iterkeys():
+        bigdiff[word] = abs(spam_words[word] - ham_words[word])
+    return sorted(bigdiff.iteritems(), key=operator.itemgetter(1), reverse=True)[:feature_count]
+    
 def print_list(l):
     for x in l:
         print l 

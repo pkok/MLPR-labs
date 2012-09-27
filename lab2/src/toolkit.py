@@ -100,7 +100,10 @@ def count_words(directory):
     for f in directory_content:
         words = open(directory + os.sep + f, 'r').read().split(' ')
         for w in words:
-            word_list[w] += ONE 
+            w = filter(lambda x: x in 'abcdefghijklmnopqrstuvwxyz',
+                    w.lower())
+            if w:
+                word_list[w] += ONE 
     return word_list
 
 
@@ -129,7 +132,7 @@ def dictsum(d1, d2, add_default=True):
     """
     sumdict = d1.copy()
     if add_default:
-        sumdict.default_factory = toolkit.NUM
+        sumdict.default_factory = NUM
         if hasattr(d1, 'default_factory') and hasattr(d2, 'default_factory'):
             sumdict.default_factory = lambda: d1.default_factory() + d2.default_factory()
         elif hasattr(d1, 'default_factory'):

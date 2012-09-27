@@ -4,6 +4,7 @@ Validation algorithms for classifiers.
 This comprises section 4 of lab assignment 2.
 """
 from collections import defaultdict
+import operator
 
 import bayes
 import features
@@ -17,7 +18,10 @@ def validate_classification(roc_step=toolkit.NUM('0.001')):
     roc = list()
 
     # Compute best features.
-    features = ['viagra', 'porn', 'x', 'job', 'patrick']
+    best_features = features.best_features(300)
+    for feature, prob in best_features:
+        print feature, "     ", prob
+    best_features = map(operator.itemgetter(0), best_features)
 
     ham_files = toolkit.get_files(bayes.HAM + bayes.TEST)
     spam_files = toolkit.get_files(bayes.SPAM + bayes.TEST)
@@ -38,7 +42,7 @@ def validate_classification(roc_step=toolkit.NUM('0.001')):
         print print_msg % (count, filename)
         threshold = toolkit.ZERO
         while threshold <= toolkit.ONE:
-            is_correct = int(bayes.classify(filename, features, threshold) == clss)
+            is_correct = int(bayes.classify(filename, best_features, threshold) == clss)
             correct[threshold][clss] += is_correct
             false[threshold][clss] += (toolkit.NUM(1) - is_correct)
             threshold += roc_step
