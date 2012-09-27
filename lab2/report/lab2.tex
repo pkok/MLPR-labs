@@ -1,6 +1,6 @@
 \documentclass[a4paper,11pt]{article}
 \usepackage{amsmath}
-\usepackage{catoptions}
+%\usepackage{catoptions}
 \usepackage{hyperref}
 \usepackage{graphicx}
 \usepackage{listings}
@@ -72,7 +72,14 @@
 The feature vector $\vec{x}$ consists of those words which 
 help to distinguish between spam and ham emails the most. 
 
-In order to find these words we wrote some code in \textit{features.py}
+In order to find these words we wrote some code in \textit{features.py} 
+to compute the probability of a word $w$ given a class. Using Bayes' rule
+we can determine this quite easy: $P(w|C_k) = \frac{P(C_k|w)P(w)}{P(C_k)}$.
+
+The prior $P(C_l)$ is based on the statistics the MAAWG collected over the 
+third quarter of 2011.
+\url{http://www.maawg.org/sites/maawg/files/news/MAAWG_2011_Q1Q2Q3_Metrics_Report_15.pdf}. This results in $P(SPAM) = 0.88$, and $P(HAM) = 0.12$.
+
 
 
 \end{document}

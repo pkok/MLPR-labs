@@ -6,7 +6,7 @@ Classes are represented by their folder paths.
 import os
 
 import toolkit
-
+import features
 
 TEST = 'test'
 TRAIN = 'train'
@@ -15,6 +15,9 @@ SPAM = os.curdir + os.sep + 'spam' + os.sep
 
 
 def classify(filename, features, threshold):
+    """ Tries to classify a filename given features. 
+    
+    Returns SPAM for spam, HAM for ham. """
     pHamF = clss_prob(HAM, filename, features, smoothing=toolkit.ONE)
     pSpamF = clss_prob(SPAM, filename, features, smoothing=toolkit.ONE)
     if (pHamF - pSpamF) > threshold:
@@ -94,6 +97,36 @@ def class_prior_prob(clss, train=True):
     return toolkit.PRIOR_SPAM
 
 
+
+def classify_wrap(file_name, features, threshold):
+    """ returns True for SPAM, False for HAM """
+    return classify(file_name, features, threshold) == SPAM
+
+def test_classify():
+    feats = features.get_features()
+    print feats
+    good = 0
+    wrong = 0
+    spam_files = toolkit.get_files('spam/train')
+
+    for sf in spam_files:
+        if classify_wrap(sf, feats, 0):
+            good += 1
+        else:
+            wrong += 1
+    
+    print "After SPAM: good: %d, wrong: %d" % (good, wrong)
+    ham_files = toolkit.get_files('ham/train')
+    for hf in ham_files:
+        if not(classify_wrap(hf, feats, 0)):
+            good += 1
+        else:
+            wrong += 1
+    print "good: %d, wrong: %d" % (good, wrong)
+            
+
+
 if __name__ == "__main__":
-    print clss_prob(SPAM, 'spam/train/02', ["Africa"])
+    test_classify()
+    #print clss_prob(SPAM, 'spam/train/02', ["Africa"])
     #print instance_prob('spam/test/01', ['Africa', 'valued', 'good day'], SPAM)
