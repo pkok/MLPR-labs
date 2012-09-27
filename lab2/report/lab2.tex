@@ -152,6 +152,9 @@ P(x|C_k)= \prod_{i=1}^d \mu^{x_i}_{i, k}(1 - \mu_{i,k})^{1-x_i}
 
 These are implemented in \texttt{bayes.py}. 
 
+Laplace smoothing was used to make sure one zero occurrence did not made the
+product for the entire probability zero as well. 
+
 % $\mu^{i,k}$ is the chance for word $x_i$ given class $C_k$ and can 
 % easily be calculated by dividing the number of emails in which 
 % $x_i$ occurs by the total amount of emails in $C-k$.  \ref{eq:2}
