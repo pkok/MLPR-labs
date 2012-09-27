@@ -65,6 +65,7 @@ def presentre_str(text, regexps, compiled=False):
     return map(lambda regexp: NUM(bool(re.search(regexp, text, flags=flags))), regexps)
 
 
+previous_countre_calls = {}
 def countre(folder, regexps, compiled=False, smoothing=0):
     """ 
     Return a list of probabilities that the regexp occurs in a file, and the
@@ -72,6 +73,9 @@ def countre(folder, regexps, compiled=False, smoothing=0):
 
     The values can be smoothed, according to Laplace smoothing.
     """
+    regexps = tuple(regexps)
+    if previous_countre_calls.has_key((folder, regexps, compiled, smoothing)):
+        return previous_countre_calls[(folder, regexps, compiled, smoothing)]
     filenames = get_files(folder)
     file_count = len(filenames)
     texts = map(file_to_str, filenames)
@@ -87,7 +91,8 @@ def countre(folder, regexps, compiled=False, smoothing=0):
     def smooth_prob(match_count):
         # TODO: Should we use len(regexps), or the number of classes?
         return (match_count + smoothing) / (file_count + len(regexps) * smoothing)
-    return map(smooth_prob, match_counts), file_count
+    previous_countre_calls[(folder, regexps, compiled, smoothing)] = map(smooth_prob, match_counts), file_count
+    return previous_countre_calls[(folder, regexps, compiled, smoothing)]
 
 
 def count_words(directory):
