@@ -102,7 +102,10 @@ def compare_words(n):
     #print len(filter(lambda x: x not in spam_words.keys(), ham_words.keys()))
     
 
+previous_best_features = []
 def best_features(feature_count):
+    ham_files = len(toolkit.get_files(bayes.HAM + bayes.TRAIN))
+    spam_files = len(toolkit.get_files(bayes.SPAM + bayes.TRAIN))
     ham_words = toolkit.count_words(bayes.HAM + bayes.TRAIN)
     spam_words = toolkit.count_words(bayes.SPAM + bayes.TRAIN)
     total_ham_words = sum(ham_words.itervalues())
@@ -117,7 +120,26 @@ def best_features(feature_count):
     bigdiff = defaultdict(spam_words.default_factory, spam_words)
     for word in ham_words.iterkeys():
         bigdiff[word] = abs(spam_words[word] - ham_words[word])
-    return sorted(bigdiff.iteritems(), key=operator.itemgetter(1), reverse=True)[:feature_count]
+    found_features = sorted(bigdiff.iteritems(), key=operator.itemgetter(1), reverse=True)
+    found_features = filter(lambda x: len(x[0]) >= 4, found_features)
+
+    print "spam files: %d (%2.2f%%)" % (spam_files, spam_files / float(spam_files
+        + ham_files) * 100.0)
+    print "ham files: %d (%2.2f%%)" % (ham_files, ham_files / float(spam_files
+        + ham_files) * 100.0)
+    print ""
+    print "spam words: %d (%2.2f%%)" % (total_spam_words, (total_spam_words /
+        (total_spam_words + total_ham_words)) * 100.0)
+    print "ham words: %d (%2.2f%%)" % (total_ham_words, (total_ham_words /
+        (total_spam_words + total_ham_words)) * 100.0)
+    print ""
+    print "unique words: %d" % len(total_words)
+    print ""
+    print "Best features:"
+
+    for feat in found_features[:feature_count]:
+        print "%s\t\t\t%f" % feat
+    return found_features[:feature_count]
     
 def print_list(l):
     for x in l:
