@@ -77,40 +77,36 @@ For the implementation we have used Python (version 2.7) with standard libraries
 \section{Feature Selection}
 The feature vector $\vec{x}$ consists of those words (expressed as 
 regular expression) which 
-help to distinguish between spam and ham emails the most. 
+help to distinguish between spam and ham emails the most.
 
 The naive Bayes classifier uses only words as features. This implies that we should pick these words carefully and correctly. More advanced spam classifiers would use other features as well, such as those that can be collected from the header of an email.
 
-In order to find these words we wrote some code in \texttt{features.py} 
-to compute the probability of a word $w$ given a class $C_k$. We can 
-determine this quite easily by dividing the number of occurrences of 
-$w$ by the total number of words in class $C_k$. We multiply this by 
-the prior $P(C_k)$, applying bayes' rule. 
+We compute the most characterizing features by maximizing the difference between $p(SPAM, w)$ and $p(HAM, w)$ for each occurring word $w$.  The text is filtered and split on on-alphabetical characters to get a list of words.
 
-A likely value for the prior was found on the internet. It is 
-% $P(w|C_k) = \frac{P(C_k|w)P(w)}{P(C_k)}$.
-is based on the statistics the MAAWG collected over the 
- third quarter of 2011.
- \url{http://www.maawg.org/sites/maawg/files/news/MAAWG_2011_Q1Q2Q3_Metrics_Report_15.pdf}. The values are: $P(SPAM) = 0.88$, and $P(HAM) = 0.12$. These 
-values are latter used in the classification process as well.
+For a class $C$, we compute the probability $p(C, w)$ in the following way:
+\begin{align*}
+  p(C, w) 
+    &= p(w | C) p(C) \\
+    &= \frac{\#(w, C) p(C)}{\sum_{w'} \#(w', C)}
+\end{align*}
 
-The words $w$, are trimmed of whitespace, transformed to lower case and 
-split on any non alpha character. 
+Here we use $\#(w, C)$ to denote the number of occurrences of a word $w$ in the file collection of class $C$.  We divide this by the amount of all words in the files of that class.
 
-We do this for both classes and end up with two lists that show how likely 
-a word is present in a class. To compare these lists we compiled one list
-that consisted of the probabilities of $P(w|SPAM) - P(w|HAM)$, sorted 
-(descended) this 
-list has the words likely for spam near the low indices, and the words likely
-for ham at the end of the list. 
+We then sort the words based on the difference in probability $|p(SPAM, w) - p(HAM, w)|$, and select the 300 highest-ranking words.
 
+This number of features is selected arbitrarily; we have not inspected if the classifier works better with a higher or lower amount of features.
+
+For the class prior $p(C)$, we have taken $p(SPAM) = 0.888$ and $p(HAM) = 1 - p(SPAM) = 0.112$.  These numbers come from the report of the Messaging Anti-Abuse Work Group's statistics, collected over the third quarter of 2011 \footnote{The report can be found at \url{http://www.maawg.org/sites/maawg/files/news/MAAWG_2011_Q1Q2Q3_Metrics_Report_15.pdf}.}.  We have not found any clue of when the data has been collected, but we assumed that it would be fairly recently.  These values are the most recent the MAAWG has published, and we hope they will make do.
+
+% Dit moeten we even opnieuw bekijken {{{
 We then apply some common sense to pick those words that seem logically to 
 pick (i.e. not `his', but rather `pills').  
 
 Below are the first few lines of the output of \texttt{python features.py}, 
 notice how it also prints some more information from the data from which we 
-are inclined to conclude that SPAM mostly consist of emails with fewer words \footnote{If only we could apply different kind of features, besides words, as well}. 
+are inclined to conclude that SPAM mostly consist of emails with fewer words.  We have not used this as a feature, as it was specified in the assignment to look only at the occurring words.
 \begin{center}
+  % TODO: Dit moeten we even vervangen.
 \begin{verbatim}
 spam files: 182 (44.61%)
 ham files: 226 (55.39%)
@@ -136,6 +132,7 @@ SPAM
 We experimented with some features, and also investigated some of the 
 messages. The resulting feature vector was: 
 \['subject', 'meds', 'pills', 'funds', 'transfer', 'make', 'save', 'viagra', 'replica', 'http', 'www'\].
+% }}}
 
 \todo{insert here}
 
@@ -154,7 +151,7 @@ P(x|C_k)= \prod_{i=1}^d \mu^{x_i}_{i, k}(1 - \mu_{i,k})^{1-x_i}
 
 These are implemented in \texttt{bayes.py}. 
 
-Laplace smoothing was used to make sure one zero occurrence did not made the
+Laplace smoothing with $\alpha = 1$ was used to make sure one zero occurrence did not made the
 product for the entire probability zero as well. 
 
 % $\mu^{i,k}$ is the chance for word $x_i$ given class $C_k$ and can 
