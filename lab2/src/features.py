@@ -121,7 +121,7 @@ def best_features(feature_count):
     for word in ham_words.iterkeys():
         bigdiff[word] = abs(spam_words[word] - ham_words[word])
     found_features = sorted(bigdiff.iteritems(), key=operator.itemgetter(1), reverse=True)
-    found_features = filter(lambda x: len(x[0]) >= 4, found_features)
+    #found_features = filter(lambda x: len(x[0]) >= 4, found_features)
 
     print "spam files: %d (%2.2f%%)" % (spam_files, spam_files / float(spam_files
         + ham_files) * 100.0)
