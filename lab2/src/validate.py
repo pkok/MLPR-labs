@@ -9,7 +9,7 @@ import operator
 import numpy
 
 import bayes
-import features
+import newfeatures as features
 import toolkit
 
 
@@ -26,9 +26,10 @@ def validate_classification(roc_step=toolkit.NUM('0.001')):
 
     # Compute best features.
     print "Computing the 300 most characteristic features"
-    print "This is done by maximizing abs(p(HAM | word) - p(SPAM | word))"
+    print "Therefore we compute the mutual information of each word with
+    respect to the classification"
     print ""
-    best_features = features.best_features(300)
+    best_features = features.best_features()[-300:]
     best_features = map(operator.itemgetter(0), best_features)
 
     ham_files = toolkit.get_files(bayes.HAM + bayes.TEST)
@@ -58,8 +59,9 @@ def validate_classification(roc_step=toolkit.NUM('0.001')):
             threshold += roc_step
     threshold = toolkit.ZERO
     while threshold <= toolkit.ONE:
-        total_false = false[bayes.HAM][threshold] + false[bayes.SPAM][threshold]
-        total_true = true[bayes.HAM][threshold] + true[bayes.SPAM][threshold]
+        total_false = toolkit.NUM(false[bayes.HAM][threshold] +
+                false[bayes.SPAM][threshold])
+        total_true = toolkit.NUM(true[bayes.HAM][threshold] + true[bayes.SPAM][threshold])
         ham_roc.append((false[bayes.HAM][threshold] / total_false,
             true[bayes.HAM][threshold] / total_true))
         spam_roc.append((false[bayes.SPAM][threshold] / total_false,

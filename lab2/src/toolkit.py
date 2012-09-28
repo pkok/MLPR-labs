@@ -4,6 +4,7 @@ assignment 2.
 """
 import os
 import re
+import sys
 from collections import defaultdict
 
 """ 
@@ -18,7 +19,9 @@ try:
     from gmpy import mpf as NUM
 except ImportError:
     from decimal import Decimal as NUM
+    MAX = NUM("Infinity")
 NUM=float
+MAX = NUM(sys.float_info.max)
 
 """The value "1" in the default numeric type."""
 ONE = NUM(1)
@@ -64,7 +67,7 @@ def presentre_str(text, regexps, compiled=False):
     regexps = tuple(regexps)
     if not previous_presentre_calls.has_key((text, regexps, compiled)):
         flags = 0
-        if compiled:
+        if not compiled:
             flags = RE_FLAGS
         previous_presentre_calls[(text, regexps, compiled)] = map(lambda regexp: NUM(bool(re.search(regexp, text, flags=flags))), regexps)
     return previous_presentre_calls[(text, regexps, compiled)]
@@ -79,24 +82,23 @@ def countre(folder, regexps, compiled=False, smoothing=0):
     The values can be smoothed, according to Laplace smoothing.
     """
     regexps = tuple(regexps)
-    if previous_countre_calls.has_key((folder, regexps, compiled, smoothing)):
-        return previous_countre_calls[(folder, regexps, compiled, smoothing)]
-    filenames = get_files(folder)
-    file_count = len(filenames)
-    texts = map(file_to_str, filenames)
-    if compiled:
-        patterns = regexps
-    else:
-        patterns = map(lambda r: re.compile(r, flags=RE_FLAGS), regexps)
-    match_counts = len(regexps) * [ZERO]
+    if not previous_countre_calls.has_key((folder, regexps, compiled, smoothing)):
+        filenames = get_files(folder)
+        file_count = len(filenames)
+        texts = map(file_to_str, filenames)
+        if compiled:
+            patterns = regexps
+        else:
+            patterns = map(lambda r: re.compile(r, flags=RE_FLAGS), regexps)
+        match_counts = len(regexps) * [ZERO]
 
-    for text in texts:
-        match_counts = map(sum, zip(match_counts, presentre_str(text, patterns)))
-    
-    def smooth_prob(match_count):
-        # TODO: Should we use len(regexps), or the number of classes?
-        return (match_count + smoothing) / (file_count + len(regexps) * smoothing)
-    previous_countre_calls[(folder, regexps, compiled, smoothing)] = map(smooth_prob, match_counts), file_count
+        for text in texts:
+            match_counts = map(sum, zip(match_counts, presentre_str(text, patterns, compiled=True)))
+        
+        def smooth_prob(match_count):
+            # TODO: Should we use len(regexps), or the number of classes?
+            return (match_count + smoothing) / (file_count + len(regexps) * smoothing)
+        previous_countre_calls[(folder, regexps, compiled, smoothing)] = map(smooth_prob, match_counts), file_count
     return previous_countre_calls[(folder, regexps, compiled, smoothing)]
 
 
@@ -155,6 +157,10 @@ def dictsum(d1, d2, add_default=True):
         else:
             sumdict[key] = d2[key]
     return sumdict
+
+
+def word_bag(filename):
+    return set(filter(None, set(re.split('[^a-z]', file_to_str(filename).lower()))))
 
 
 def get_files(folder):
