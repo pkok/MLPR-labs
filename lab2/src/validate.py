@@ -21,7 +21,8 @@ def validate_classification(roc_step=toolkit.NUM('0.001')):
     true[bayes.SPAM] = defaultdict(lambda: toolkit.NUM(0))
     false[bayes.HAM] = defaultdict(lambda: toolkit.NUM(0))
     false[bayes.SPAM] = defaultdict(lambda: toolkit.NUM(0))
-    roc = list()
+    ham_roc = list()
+    spam_roc = list()
 
     # Compute best features.
     print "Computing the 300 most characteristic features"
@@ -42,7 +43,7 @@ def validate_classification(roc_step=toolkit.NUM('0.001')):
     from math import log, ceil
     total_count = ham_count + spam_count
     total_digits = ceil(log(total_count, 10))
-    print_msg = "%%s Processing file (%%0%dd/%d): %%s " % (total_digits, total_count)
+    print_msg = "[%%s] Processing file %%0%dd of %d: %%s " % (total_digits, total_count)
     count = 0
     for filename, clss in test_samples:
         count += 1
@@ -59,21 +60,27 @@ def validate_classification(roc_step=toolkit.NUM('0.001')):
     while threshold <= toolkit.ONE:
         total_false = false[bayes.HAM][threshold] + false[bayes.SPAM][threshold]
         total_true = true[bayes.HAM][threshold] + true[bayes.SPAM][threshold]
-        roc.append((false[bayes.HAM][threshold] / total_false,
+        ham_roc.append((false[bayes.HAM][threshold] / total_false,
             true[bayes.HAM][threshold] / total_true))
+        spam_roc.append((false[bayes.SPAM][threshold] / total_false,
+            true[bayes.SPAM][threshold] / total_true))
         threshold += roc_step
     #roc.reverse()
-    print len(roc)
-    f = open('roc.dat', 'w')
-    for e in roc:
-        f.write(str(e[0]) + ' ' + str(e[1]) + '\n')
-        f.flush()
-    f.close()
-    return true, false, roc
+    print len(ham_roc)
+    hamfile = open('ham_roc.dat', 'w')
+    spamfile = open('spam_roc.dat', 'w')
+    for h_e, s_e in zip(ham_roc, spam_roc):
+        hamfile.write(str(h_e[0]) + ' ' + str(h_e[1]) + '\n')
+        hamfile.flush()
+        spamfile.write(str(s_e[0]) + ' ' + str(s_e[1]) + '\n')
+        spamfile.flush()
+    hamfile.close()
+    spamfile.close()
+    return true, false, ham_roc, spam_roc
 
 
 if __name__ == "__main__":
-    correct, false, roc = validate_classification(toolkit.NUM('0.01'))
+    correct, false, ham_roc, spam_roc = validate_classification(toolkit.NUM('0.01'))
     print "\n\n======= ROC IS PRINTED TO 'roc.dat' ======="
     """
     f = open('roc.dat', 'w')
