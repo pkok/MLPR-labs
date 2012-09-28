@@ -6,6 +6,7 @@ This comprises section 4 of lab assignment 2.
 from collections import defaultdict
 from time import gmtime, strftime
 import operator
+import numpy
 
 import bayes
 import features
@@ -14,8 +15,12 @@ import toolkit
 
 def validate_classification(roc_step=toolkit.NUM('0.001')):
     """Compute the ROC."""
-    correct = defaultdict(lambda: defaultdict(lambda:toolkit.NUM(0)))
-    false = defaultdict(lambda: defaultdict(lambda:toolkit.NUM(0)))
+    true = dict()
+    false = dict()
+    true[bayes.HAM] = defaultdict(lambda: toolkit.NUM(0))
+    true[bayes.SPAM] = defaultdict(lambda: toolkit.NUM(0))
+    false[bayes.HAM] = defaultdict(lambda: toolkit.NUM(0))
+    false[bayes.SPAM] = defaultdict(lambda: toolkit.NUM(0))
     roc = list()
 
     # Compute best features.
@@ -44,23 +49,35 @@ def validate_classification(roc_step=toolkit.NUM('0.001')):
         print print_msg % (strftime("%H:%M:%S", gmtime()), count, filename)
         threshold = toolkit.ZERO
         while threshold <= toolkit.ONE:
-            is_correct = int(bayes.classify(filename, best_features, threshold) == clss)
-            correct[threshold][clss] += is_correct
-            false[threshold][clss] += (toolkit.NUM(1) - is_correct)
+            classification =  bayes.classify(filename, best_features, threshold)
+            if (classification == clss):
+                true[classification][threshold] += toolkit.ONE
+            else:
+                false[classification][threshold] += toolkit.ONE
             threshold += roc_step
     threshold = toolkit.ZERO
     while threshold <= toolkit.ONE:
-        roc.append((false[threshold][bayes.SPAM] / ham_count,
-            correct[threshold][bayes.SPAM] / spam_count))
+        total_false = false[bayes.HAM][threshold] + false[bayes.SPAM][threshold]
+        total_true = true[bayes.HAM][threshold] + true[bayes.SPAM][threshold]
+        roc.append((false[bayes.HAM][threshold] / total_false,
+            true[bayes.HAM][threshold] / total_true))
         threshold += roc_step
-    roc.reverse()
-    return correct, false, roc
+    #roc.reverse()
+    print len(roc)
+    f = open('roc.dat', 'w')
+    for e in roc:
+        f.write(str(e[0]) + ' ' + str(e[1]) + '\n')
+        f.flush()
+    f.close()
+    return true, false, roc
 
 
 if __name__ == "__main__":
     correct, false, roc = validate_classification(toolkit.NUM('0.01'))
     print "\n\n======= ROC IS PRINTED TO 'roc.dat' ======="
+    """
     f = open('roc.dat', 'w')
     for element in roc:
-        f.write(str(element[0]) + ", " + str(element[1]) + "\n")
+        f.write(str(element[0]) + " " + str(element[1]) + "\n")
     f.close()
+    """
