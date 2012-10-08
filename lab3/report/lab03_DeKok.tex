@@ -1,0 +1,40 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage{amsmath}
+\usepackage[english]{babel}
+\usepackage{color}
+\usepackage{hyperref}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\Bern}{Bern}
+
+\newcommand{\hl}[1]{\colorbox{cyan}{#1}}
+\newcommand{\mhl}[1]{\mathchoice%
+  {\colorbox{cyan}{$\displaystyle#1$}}%
+  {\colorbox{cyan}{$\textstyle#1$}}%
+  {\colorbox{cyan}{$\scriptstyle#1$}}%
+  {\colorbox{cyan}{$\scriptscriptstyle#1$}}}
+
+\title{Lab 3: Expectation Maximisation}
+\author{Patrick de Kok}
+\begin{document}
+\maketitle
+
+\section{Gaussian Distribution}
+%TODO: split banana.mat in train and test sets
+\begin{itemize}
+  \item Plot the train and test set of banana.mat.
+  \item Just by looking at the data, do you think the model will perform well?
+  \item Train it, which consists of finding $p(C_k)$, and the parameters of the class-conditional distributions, the means $\mu_k$ and covariance matrices $\Sigma_k$.
+
+    \begin{align*}
+      \mathtt{data} &\mathtt{= load('banana.mat')} \\
+      \mu_A &= \mathtt{sum(data.A) ./ size(data.A, 1)} \\
+      \mu_B &= \mathtt{sum(data.B) ./ size(data.B, 1)} \\
+    \end{align*}
+  \item Include how you compute $\mu_k,\Sigma_k$ in your report
+\end{itemize}
+
+\section{Mixtures of Gaussians}
+
+\section{Log-Probabilities}
+\end{document}
