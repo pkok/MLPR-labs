@@ -1,8 +1,8 @@
 function [confusion_matrix, error_rate] = ex1()
 
 [train_A, train_B, test_A, test_B] = preprocess_data(0, 0.7, 'banana.mat');
-test = [test_A; test_B]
-test_labels = [ones(size(test_A, 1)), zeros(size(test_A, 1)); zeros(size(test_B, 1)), ones(size(test_B, 1))]
+test = [test_A; test_B];
+test_labels = [ones(size(test_A, 1), 1), zeros(size(test_A, 1), 1); zeros(size(test_B, 1), 1), ones(size(test_B, 1), 1)];
 
 figure();
 hold on;
@@ -27,12 +27,13 @@ false_A = 0;
 true_B = 0;
 false_B = 0;
 
-for i=1:size(test,1),
+for i=1:size(test,1)
   if pCA(i) > pCB(i)
     if test_labels(i, 1) == 1
       true_A += 1;
     else
       false_A += 1;
+    end
   else
     if test_labels(i, 2) == 1
       true_B += 1;
@@ -42,5 +43,5 @@ for i=1:size(test,1),
   end
 end
 
-confusion_matrix = [true_A, false_A; false_B, true_B]
-error_rate = 1 - ((true_A + true_B) / size(test, 1))
+confusion_matrix = [true_A, false_A; false_B, true_B];
+error_rate = 1 - ((true_A + true_B) / size(test, 1));
