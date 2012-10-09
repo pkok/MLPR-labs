@@ -23,8 +23,8 @@ plot(train_A(:, 1), train_A(:, 2), '@+1');
 plot(train_B(:, 1), train_B(:, 2), '@x3');
 hold off;
 
-mu_A = sum(train_A) ./ size(train_A, 1);
-mu_B = sum(train_B) ./ size(train_B, 1);
+mu_A = mean(train_A);
+mu_B = mean(train_B);
 mu = [mu_A; mu_B];
 
 sigma_A = cov(train_A);
