@@ -12,7 +12,7 @@ end
 splitA = floor(sizeA * splitpercentage);
 splitB = floor(sizeB * splitpercentage);
 % Reshuffle the samples; do not cluster type A near itself.
-train_A = A(1:splitA, :)
-train_B = B(1:splitB, :)
+train_A = A(1:splitA, :);
+train_B = B(1:splitB, :);
 test_A = A((splitA+1):sizeA,:);
 test_B = B((splitB+1):sizeB,:);
