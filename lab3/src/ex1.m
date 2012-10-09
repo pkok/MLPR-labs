@@ -1,6 +1,9 @@
 function [confusion_matrix, error_rate] = ex1()
 
-[train_A, train_B, test_A, test_B] = preprocess_data(0, 0.7, 'banana.mat');
+% Setting the seed for the random generator.
+rand("seed", 42)
+
+[train_A, train_B, test_A, test_B] = preprocess_data(1, 0.7, 'banana.mat');
 test = [test_A; test_B];
 test_labels = [ones(size(test_A, 1), 1), zeros(size(test_A, 1), 1); zeros(size(test_B, 1), 1), ones(size(test_B, 1), 1)];
 
@@ -22,26 +25,10 @@ pCA = mvnpdf(test, mu_A, sigma_A) .* (size(train_A, 1) / (size(train_A, 1) + siz
 pCB = mvnpdf(test, mu_B, sigma_B) .* (size(train_B, 1) / (size(train_A, 1) + size(train_B, 1)));
 pCx = [pCA; pCB];
 
-true_A = 0;
-false_A = 0;
-true_B = 0;
-false_B = 0;
-
-for i=1:size(test,1)
-  if pCA(i) > pCB(i)
-    if test_labels(i, 1) == 1
-      true_A += 1;
-    else
-      false_A += 1;
-    end
-  else
-    if test_labels(i, 2) == 1
-      true_B += 1;
-    else
-      false_B += 1;
-    end
-  end
-end
+true_A = sum(((pCA > pCB) == test_labels(:, 1)) .* test_labels(:, 1));
+true_B = sum(((pCA <= pCB) == test_labels(:, 2)) .* test_labels(:, 2));
+false_A = size(train_B) - true_B;
+false_B = size(train_A) - true_A;
 
 confusion_matrix = [true_A, false_A; false_B, true_B];
 error_rate = 1 - ((true_A + true_B) / size(test, 1));
