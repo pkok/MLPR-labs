@@ -32,6 +32,7 @@ sizeB = size(B, 1);
 if (randomize ~= 0)
   if (randomize > 0)
     rand('seed', randomize);
+  end
   A = A(randperm(sizeA), :);
   B = B(randperm(sizeB), :);
 end
