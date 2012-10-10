@@ -10,7 +10,7 @@ denominator = zeros(size(Q, 1), 1);
 
 for i=1:size(MOG)
   Q(:, i) = MOG{i}.PI * mvnpdf(X, MOG{i}.MU, MOG{i}.SIGMA);
-  denominator += Q(:, i);
+  denominator = denominator + Q(:, i);
 end
-Q ./= repmat(denominator, [1, size(MOG, 1)]);
+Q = Q ./ repmat(denominator, [1, size(MOG, 1)]);
 LL = sum(log(denominator));

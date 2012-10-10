@@ -6,6 +6,6 @@ MOG = cell(C, 1);
 step = size(X, 1) / C;
 
 for i=1:C
-  slice = X((1 + ((i-1) * step)):(i*step), :);
-  MOG{i} = struct('MU', mean(slice), 'SIGMA', cov(slice), 'PI', 1/C);
+  slice = X((1 + floor((i - 1) * step)):floor(i * step), :);
+  MOG{i} = struct('MU', mean(slice), 'SIGMA', cov(slice), 'PI', 1 / C);
 end
