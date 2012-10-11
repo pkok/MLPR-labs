@@ -7,15 +7,14 @@
 %     log(x + y) = v + log(1 + exp(w - v))
 %
 % Patrick de Kok
-function logsum = logsumexp(data, dim)
-if nargin == 1
-  dim = 1;
-end
+function logsum = logsumexp(data)
+logsum = data(:, 1);
+for i=2:size(data, 2)
+  lnpa = logsum;
+  lnpb = data(:, i);
 
-if size(data, dim) == 1
-  data = transpose(data);
-end
+  high = max(lnpa, lnpb);
+  low = min(lnpa, lnpb);
 
-high = max(data, [], dim);
-low = min(data, [], dim);
-logsum = high + log(1 + exp(low - high));
+  logsum = high + log(ones(size(lnpa)) + exp(low - high)); 
+end

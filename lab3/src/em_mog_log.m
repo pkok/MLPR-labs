@@ -44,8 +44,8 @@ for iter=1:max_iters; % EM loops
   if iter > 1
     rel_change = (LogL(end)-LogL(end-1)) / abs(mean(LogL(end-1:end)));
 
-    if rel_change > 0
-      fprintf('Log likelihood increased in iteration %d\n',iter)
+    if rel_change < 0
+      fprintf('Log likelihood decreased in iteration %d\n',iter)
     end
     if verbose
       fprintf('iteration %3d   Logl %.2f  relative increment  %.6f\n',iter, LogL(end),rel_change)
