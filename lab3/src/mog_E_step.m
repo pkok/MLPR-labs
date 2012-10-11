@@ -1,6 +1,6 @@
 % [Q, LL] = mog_E_step(X, MOG)
 %
-% Expectation-step of the EM algorithm
+% Expectation step of the EM algorithm
 % Parameters are:
 %   X (N x D)     : Data matrix, with N data points of dimensionality D.
 %   MOG (K cells) : Current mixture of Gaussian data, containing the average
@@ -9,7 +9,7 @@
 % Returns:
 %   Q (N x K)     : For each data point x_n, contains the responsibility 
 %                       gamma(z_k) == p(z_k = 1 | x_n)     (Bishop eq. 9.13)
-%   LL            : The log-likelihood of the data set under the mixture
+%   LL            : The log-likelihood of the dataset under the mixture
 %                   model ln p(X | MOG), according to eq. 9.14 of Bishop.
 %
 % Patrick de Kok

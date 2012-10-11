@@ -1,6 +1,6 @@
 % [Q, LL] = mog_E_step(X, MOG)
 %
-% Expectation-step of the EM algorithm
+% Expectation step of the EM algorithm
 % Parameters are:
 %   X (N x D)     : Data matrix, with N data points of dimensionality D.
 %   MOG (K cells) : Current mixture of Gaussian data, containing the average
@@ -21,7 +21,8 @@ Q = zeros(size(X,1), size(MOG, 1));
 %  Single computation given by eq. 9.13 of Bishop.
 %  First computing it all in log-probabilities but eventually...
 for i=1:size(MOG)
-  Q(:, i) = log(MOG{i}.PI) * lmvnpdf(X, MOG{i}.MU, MOG{i}.SIGMA);
+  PI = repmat(log(MOG{i}.PI), [size(X, 1), 1]);
+  Q(:, i) = logsumexp([PI(:,1), lmvnpdf(X, MOG{i}.MU, MOG{i}.SIGMA)], 2);
 end
 
 sumQ = logsumexp(Q, 2);

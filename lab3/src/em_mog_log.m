@@ -1,4 +1,4 @@
-% [LogL,mog] = em_mog(X,C,verbose);
+% [LogL,mog] = em_mog_log(X,C,verbose);
 %
 % Parameters are:
 %   X (N x D) : data matrix 
@@ -9,7 +9,8 @@
 % http://www.science.uva.nl/~jverbeek
 %
 % Modified Oct 2008 Gwenn Englebienne  
-function [LogL,mog] = em_mog(X,C,verbose);
+% Modified Oct 2012 Patrick de Kok
+function [LogL,mog] = em_mog_log(X,C,verbose);
 
 epsilon       = 1e-5;
 max_iters     = 1000;
@@ -43,8 +44,8 @@ for iter=1:max_iters; % EM loops
   if iter > 1
     rel_change = (LogL(end)-LogL(end-1)) / abs(mean(LogL(end-1:end)));
 
-    if rel_change < 0
-      fprintf('Log likelihood decreased in iteration %d\n',iter)
+    if rel_change > 0
+      fprintf('Log likelihood increased in iteration %d\n',iter)
     end
     if verbose
       fprintf('iteration %3d   Logl %.2f  relative increment  %.6f\n',iter, LogL(end),rel_change)

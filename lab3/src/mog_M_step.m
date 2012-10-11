@@ -18,28 +18,28 @@
 function MOG = mog_M_step(X, Q, MOG)
 % Number of elements per Gaussian mixture.
 %   Given by eq. 9.18 of Bishop.
-N_i = sum(Q);
+N_k = sum(Q);
 
 % Number of data elements.
-%   Equals sum(N_i).
+%   Equals sum(N_k).
 N = size(X, 1);
 
-for i = 1:size(MOG, 1)
+for k = 1:size(MOG, 1)
   % Update the mean of the Gaussian mixture.
   %   Given by eq. 9.17 of Bishop.
-  MOG{i}.MU = sum(repmat(Q(:,i), [1, 2]) .* X) / N_i(i);
+  MOG{k}.MU = sum(repmat(Q(:,k), [1, 2]) .* X) / N_k(k);
 
   % Recompute the covariance...
   %   Given by eq. 9.19 of Bishop.
-  sigma = repmat(Q(:,i)', [2, 1]) .* (X - repmat(MOG{i}.MU, [N, 1]))' * (X - repmat(MOG{i}.MU, [N, 1])) / N_i(i);
+  sigma = repmat(Q(:,k)', [2, 1]) .* (X - repmat(MOG{k}.MU, [N, 1]))' * (X - repmat(MOG{k}.MU, [N, 1])) / N_k(k);
 
   % ... But only if it is a significant, not-almost-zero number.
   %   Given in the exercise.
   if cond(sigma) < 10^10
-    MOG{i}.SIGMA = sigma;
+    MOG{k}.SIGMA = sigma;
   end
 
   % And a new value for the mixing coefficient.
   %   Given by eq. 9.22 of Bishop.
-  MOG{i}.PI = N_i(i) / N;
+  MOG{k}.PI = N_k(k) / N;
 end
