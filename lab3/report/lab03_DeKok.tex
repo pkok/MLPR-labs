@@ -102,13 +102,13 @@ In the second exercise, a classifier will be trained to recognize the classes of
 
 The iterative loop of the EM algorithm has been implemented already, as well as a visualization module, which is called in every iteration.  To make everything work, I have implemented the following three MATLAB functions.
 \begin{itemize}
-\item \texttt{MOG = init\_mog(X, C)}.  Given the data and the desired number of Gaussians, compute the mean \texttt{MU}, covariance \texttt{SIGMA} and mixing coefficient \texttt{PI} for each Gaussian.  This is stored in \texttt{MOG}, a \texttt{C}-by-1 cell array of structures containing only these three keys.  For the $\T{k}$th element of \texttt{MOG}, \texttt{MU}, \texttt{SIGMA} and \texttt{PI} in the software correspond with the mathematical concepts of $\muk$, $\covk$ and $\mck$.  Another possible initialization is filling $\muk$, $\covk$ and $\mck$ with random values within the range of the dataset, for all possible values of $k$.  I have not tried doing so, as I expect this to be less effective.
+\item \texttt{MOG = init\_mog(X, C)}.  Given the data and the desired number of Gaussians, compute the mean \texttt{MU}, covariance \texttt{SIGMA} and mixing coefficient \texttt{PI} for each Gaussian.  For $N$ data points, each Gaussian mixture is fitted through $\mhl{N_k = N / \T{C}}$ points, \hl{and the mean and covariance is computed for this set.}  \texttt{PI} is set to $N_k$.  This is stored in \texttt{MOG}, a \texttt{C}-by-1 cell array of structures containing only these three keys.  For the $\T{k}$th element of \texttt{MOG}, \texttt{MU}, \texttt{SIGMA} and \texttt{PI} in the software correspond with the mathematical concepts of $\muk$, $\covk$ and $\mck$. 
 %
 \item \texttt{[Q LL] = mog\_E\_step(X, MOG)}.  This implements the expectation step of the EM algorithm.  For each data point $\mathtt{x} = \mathtt{X(n, :)}$ and the $\T{k}$th mixture with mean $\muk$, covariance $\covk$ and mixing coefficient $\mck$, the responsibility $\mck \mathcal{N}(\T{x} ; \muk, \covk)$ is divided by the sum of all responsibilities of the $\T{k}$th mixture, and stored in $\T{Q(n, k)}$, a $\T{N}$-by-$\T{C}$ matrix.  This corresponds with equation 9.13 of \cite{Bishop}:
 \begin{align*}
 \T{Q(n, k)} = \gamma(z_k) \equiv p(z_k = 1 | \V{x}) 
-    &= \frac{p(z_k = 1) p(\V{x} | z_k = 1)}{\sum_{j=1}^{k} p(z_j = 1) p(\V{x} | z_j = 1)} \\
-    &= \frac{\mck \mathcal{N}(\V{x} ; \muk, \covk)}{\sum_{j=1}^{k} \pi_j \mathcal{N}(\V{x} ; \muk, \covk)}
+    &= \frac{p(z_k = 1) p(\V{x} | z_k = 1)}{\sum_{j=1}^{C} p(z_j = 1) p(\V{x} | z_j = 1)} \\
+    &= \frac{\mck \mathcal{N}(\V{x} ; \muk, \covk)}{\sum_{j=1}^{C} \pi_j \mathcal{N}(\V{x} ; \muk, \covk)}
 \end{align*}
 However, in my implementation, only one iterator is used; MATLAB can compute the Gaussian distribution for a \texttt{N}-by-\texttt{D} matrix, given a 1-by-\texttt{D} mean and \texttt{D}-by-\texttt{D} covariance matrix.  Another speedup is computing the denominator \texttt{d} together with the numerator, and only dividing each \texttt{Q(n, k)} when the complete denominator is known.
 
@@ -139,7 +139,7 @@ Because the mean and data points are stored as row vectors, the transpose operat
 \covk &= \frac{1}{N_k} \sum_{n=1}^{N} \T{Q(n,k)} (\T{x}_n - \muk)^T (\T{x}_n - \muk)
 \end{align*}
 
-$\covk$ is only updated if it is non-singular.  In the code, this is defined as $\T{cond(}\covk\T{)} < 10^{10}$.  If $\covk$ is singular, the Gaussian has a really small area (almost no area) with high probabilities, so that almost no data point will be covered by it.
+$\covk$ is only updated if it is non-singular.  In the code, this is defined as $\T{cond(}\covk\T{)} < 10^{10}$.  If $\covk$ is \hl{singular}, the Gaussian has a really small area (almost no area) with high probabilities, so that \hl{almost no data point will be covered by it}.  This is hinted at in the exercise.
 
 \end{itemize}
 
@@ -148,7 +148,7 @@ Finding the most likely class for the data is done in a similar fashion as for t
 \begin{align*}
 \cML(\V{x}) &= \argmax_{\ck} p(\V{x} | \ck) \\
     &= \argmax_{\ck} p(\ck) \sum_j p(\V{x}_n | z_j, \ck) p(z_j | \ck) \\
-    &= \argmax_{\ck} p(\ck) \sum_j \mathcal{N}(\V{x}_n ; \mean_{jk}, \cov_{jk}) p(z_j | \ck)
+    &= \argmax_{\ck} p(\ck) \sum_j \mathcal{N}(\V{x}_n ; \mean_{jk}, \cov_{jk}) p(z_j | \ck) \\
     &= \argmax_{\ck} p(\ck) \sum_j \mathcal{N}(\V{x}_n ; \mean_{jk}, \cov_{jk}) \pi_{jk}
 \end{align*}
 
@@ -170,38 +170,27 @@ I have tested the test data of both datasets for different models involving 1 th
 \end{center}
 \end{figure}
 
-\begin{enumerate}
-\item What is a sensible way to initialize the parameters of your model
-\item How many components should you try?  Having plotted the data, can you guess what number of components should be optimal?  How does your classification accuracy evolve as the number of components change?
-\item Do the results depend on the initialisation?
-\item Why is hint 1 important?
-\end{enumerate}
+For the \hl{\texttt{banana.mat}} dataset, the lowest error rate is $0.0117$, which occurred with 10, 18 and 26 Gaussian mixtures.  According to Occam's razor, one should always prefer the simplest hypothesis, I would advise using $\mhl{\T{C} = 10}$.
+
+I find the same number of Gaussians for the \hl{\texttt{spiral.mat}} dataset.  The lowest error rate is $0.0017$, for $\T{C} \in \{10, 16\}$.  With the same argumentation, I advise \hl{10 Gaussians}.
+
 
 \section{Log-Probabilities}
+Because of \hl{underflow errors} occurring when multiplying floating point numbers, one might like to work with \hl{logaritms of probabilities}, instead of directly with probabilities.  Multiplication of two logarithms $\ln(a) \ln(b)$ is the same as the logarithm of a sum $\ln(a+b)$.  To do this, we need to compute that new value.
 
+For two $N$-dimensional vectors $x, y$, determine per dimension the maximum and minimum element, and store these two vector as $high$ and $low$.  Then the logarithm of the sum is computed through $\mhl{high + \ln(1 + \exp(low - high))}$\footnote{Note that in the implementation, the scalar $1$ must be replaced by a $N$-dimensional vector with all $1$s.}.  The function is implemented in such a way that it \hl{computes the sum by adding the $i$th row} \hl{by the intermediate result}.  By doing it in this way, $\T{logsumexp}$ accepts a general matrix as input, and computes the sum along the rows.  The implementation computes the correct sum.  For example \texttt{\hl{logsumexp([-1000, -1001]) = -999.6867}}.
 
-\begin{enumerate}
-\item
-First implement a function called logsumexp that computes the sum of two log-probabilities as described above. Make sure that this function takes the largest value out of the logarithm. Write the function so that both scalars and matrices can be used as arguments
+The expectation step should be slightly modified.  Where we used before 
+\begin{align*}
+\mathtt{Q(n, k)} &= \frac{\mck \mathtt{mvnpdf}(\V{x}, \muk, \covk)}{\sum_{j=1}^C \pi_j \T{mvnpdf}(\V{x}, \muk, \covk)}
+\end{align*} 
+we now compute:
+\begin{align*}
+\mathtt{Q(n, k)} &= \exp\left( \ln\mck \mathtt{lmvnpdf}(\V{x}, \muk, \covk) - \sum_{j=1}^C \pi_j \T{lmvnpdf}(\V{x}, \muk, \covk)\right)
+\end{align*}
 
-\item 
-Discuss how we can use this function to compute sums of more than two probabilities using log-probabilities.
+This did not change the results for both datasets, both for the best number of Gaussian mixtures for classification, as the error rates. 
 
-\item
-Check your implementation by computing ln[p(a) + p(b)] when ln p(a) = −1000 and ln p(b) = −1001.
-
-\item
-Now convert the E-step of the previous exercise. Use the function lmvnpdf(X,MU,SIGMA) which is functionally equivalent to log mvnpdf(X,MU,SIGMA) but never computes the logarithm or exponent and is therefore numerically stable:
-
-Notice, however, that only the function mog E step is changed, and that it must still return p(z|x, θ),
-not ln p(z|x, θ). In the adapted function, you compute ln p(z|x, θ), but you need to exponentiate it before
-returning the value. However now the computation does not suffer from the underflows and is therefore more
-precise.
-Include the pseudocode for logsumexp in your report, and write down what the E-step becomes when
-using log-probabilities. Discuss how this affects your results.
-\end{enumerate}
-
-
-\bibliographystyle{alpha}
+\bibliographystyle{plain}
 \bibliography{references}
 \end{document}

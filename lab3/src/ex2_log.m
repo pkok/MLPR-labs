@@ -2,7 +2,7 @@
 % the 2012 MSc AI course Machine Learning: Pattern Recognition.
 % When passed the optional parameter random_seed, the random generator for
 % shuffling the dataset is set. If not, Octave/Matlab will determine the seed.
-function [confusion_matrix, error_rate] = ex2(dataset, max_C, random_seed)
+function [confusion_matrices, error_rates] = ex2(dataset, max_C, random_seed)
 
 if nargin < 3
   random_seed = 0;
