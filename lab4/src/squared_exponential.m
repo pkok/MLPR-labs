@@ -11,4 +11,4 @@
 %
 % Patrick de Kok
 function k = squared_exponential(theta, ell)
-k = @(x, x_) (theta * exp(-1 / (2 * ell)) * (x - x_)' * (x - x_);
+k = @(x, x_) (theta * exp(-1 / (2 * ell)) * (x - x_)' * (x - x_));
