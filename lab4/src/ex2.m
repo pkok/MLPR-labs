@@ -25,7 +25,8 @@ plot(test(:, 1), test(:, 2), 'bx');
 
 k = squared_exponential(0.5, 0.5);
 for i=1:size(test, 1)
-  label = gaussian_process(train(:, 1), train(:, 2), k, 1e-7, test(i, 1));
+  [label, sigma2, llog] = gaussian_process(train(:, 1), train(:, 2), k, 1e-7, test(i, 1));
+  disp(sprintf('%f  %f +- %f   (logl = %f) ', test(i,1), label, sigma2, llog));
   plot(test(i, 1), label, 'mo');
 end
 

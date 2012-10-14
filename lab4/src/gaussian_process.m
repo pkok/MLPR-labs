@@ -14,6 +14,7 @@
 %   LLog      : How probable is our training data under the model?
 %
 % Patrick de Kok
+%function [f_, sigma2_, LLog] = gaussian_process(X, t, k, sigma2, x_)
 function [f_, sigma2_, LLog] = gaussian_process(X, t, k, sigma2, x_)
 N = size(X, 1);
 
@@ -29,9 +30,9 @@ for i=1:N
   k_(i, 1) = k(X(i,:), x_);
 end
 
-L = chol(K + (sigma2 * eye(N)));
+L = chol(K + (sigma2 * eye(N)), 'lower');
 alpha = L' \ (L \ t);
-f_ = k' * alpha;
+f_ = k_' * alpha;
 v = L \ k_;
 sigma2_ = k(x_, x_) - v' * v;
 LLog = -0.5 * t' * alpha - sum(diag(L)) - (N / 2) * log(2*pi);
