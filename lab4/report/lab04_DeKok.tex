@@ -65,7 +65,7 @@ In the first assignment, I have looked at a Gaussian distribution $\mathcal G_1 
   In \autoref{fig:plot2}, \hl{the marginal distribution} over $x_1$ for the follow values of $x_2$ are given, \hl{from top to bottom:} $\mhl{-3, -2, -1, 0, 1, 2, 3}$.  Not that these seven plots are identical to the subfigure in \autoref{fig:plot1}.  This is not really surprising, when looking at the computation:
   \begin{align*}
     p(x_1 | x_2 = v) 
-    &= \npdf(x_1; \mean_1 - \Lambda_{1,1}^{-1} \Lambda{1,2} (x_2 - \mu_2), \Lambda_{1,1}^{-1}) \\
+    &= \npdf(x_1; \mean_1 - \Lambda_{1,1}^{-1} \Lambda_{1,2} (x_2 - \mu_2), \Lambda_{1,1}^{-1}) \\
     &= \npdf(x_1; 0 - 1  \times 0 \times v, 1) \\
     &= \npdf(x_1; 0, 1) \\
     &= p(x_1)
@@ -75,7 +75,7 @@ In the first assignment, I have looked at a Gaussian distribution $\mathcal G_1 
   Another distribution I have looked at, is $\mathcal G_2 = \npdf(\V{X}; \mean, \cov)$ with $\cov = \begin{bmatrix}1 & 0.7 \\ 0.7 & 1\end{bmatrix}$.  The \hl{surface plot is given in \autoref{fig:plot3}}.  Although the marginal distribution of $\mathcal G_1$ over $x_1$ and $\mathcal G_2$ are equal, their conditional distributions over $x_1$ given $x_2$ are not.  For $x_2 = v$, the conditional distribution is:
     \begin{align*}
       p(x_1 | x_2 = v)
-      &= \npdf(x_1; \mean_1 - \Lambda_{1,1}^{-1} \Lambda{1,2} (x_2 - \mu_2), \Lambda_{1,1}^{-1}) \\
+      &= \npdf(x_1; \mean_1 - \Lambda_{1,1}^{-1} \Lambda_{1,2} (x_2 - \mu_2), \Lambda_{1,1}^{-1}) \\
       &= \npdf(x_1; 0 - 1.1952 \times -0.2789 \times x_2, 1.1952) \\
       &= \npdf(x_1; 0.3333 x_2, 1.1952)
     \end{align*}
