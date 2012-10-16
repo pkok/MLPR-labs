@@ -35,4 +35,4 @@ alpha = L' \ (L \ t);
 f_ = k_' * alpha;
 v = L \ k_;
 sigma2_ = k(x_, x_) - v' * v;
-LLog = -0.5 * t' * alpha - sum(diag(L)) - (N / 2) * log(2*pi);
+LLog = -0.5 * t' * alpha - sum(diag(log(L))) - (N / 2) * log(2*pi);
