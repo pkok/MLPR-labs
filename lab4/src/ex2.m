@@ -25,13 +25,13 @@ test = chirps(end, :);
 
 N = size(train, 1);
 
-%figure()
-%hold on;
-%
-%xlabel('Frequency of cricket chirps (Herz)');
-%ylabel('Ambient temperature (degrees Fahrenheit)');
-%plot(train(:, 1), train(:, 2), 'r+');
-%plot(test(:, 1), test(:, 2), 'bx');
+figure()
+hold on;
+
+xlabel('Frequency of cricket chirps (Herz)');
+ylabel('Ambient temperature (degrees Fahrenheit)');
+plot(train(:, 1), train(:, 2), 'r+');
+plot(test(:, 1), test(:, 2), 'bx');
 
 avg_ell = (max(train(:, 1)) - min(train(:, 1))) / N;
 avg_theta = (max(train(:, 2)) - min(train(:, 2))) / N;
@@ -59,8 +59,8 @@ end
 
 sigma2 = 1e-7;
 
-for ell=min_ell:d_ell:max_ell
-  for theta=min_theta:d_theta:max_theta
+for ell=[min_ell:d_ell:avg_ell, (2*avg_ell):avg_ell:max_ell]
+  for theta=[min_theta:d_theta:avg_theta, (2*avg_theta):avg_theta:max_theta]
     sprintf('th: %f\nel: %f', theta, ell);
     k = squared_exponential(theta, ell);
     parfor i=1:N
@@ -84,13 +84,18 @@ end
 ell = max_ell(best_index);
 theta = max_theta(best_index);
 
+disp('ell');
+disp(ell);
+disp('theta');
+disp(theta);
+
 k = squared_exponential(theta, ell);
 performance = 0;
 for i=1:size(test, 1)
   [prediction, sigma_2, ~] = gaussian_process(train(:, 1), train(:, 2), k, sigma2, test(i, 1));
   performance = performance + (prediction - test(i, 2)) * (prediction - test(i, 2));
-  %plot(test(i, 1), prediction, 'mo');
-  %line([test(i, 1), prediction - sigma_2], [test(i, 1), prediction + sigma_2], 'Color', 'm');
+  plot(test(i, 1), prediction, 'mo');
+  line([test(i, 1), prediction - sigma_2], [test(i, 1), prediction + sigma_2], 'Color', 'm');
 end
 
-%hold off;
+hold off;
