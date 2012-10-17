@@ -1,4 +1,4 @@
-function performance = ex22(random_seed)
+function performance = ex2(random_seed)
 
 if nargin ~= 1
   random_seed = 0;
@@ -36,14 +36,26 @@ plot(test(:, 1), test(:, 2), 'bx');
 avg_ell = (max(train(:, 1)) - min(train(:, 1))) / N;
 avg_theta = (max(train(:, 2)) - min(train(:, 2))) / N;
 
-d_ell = avg_ell / 10;
-d_theta = avg_theta / 10;
+%d_ell = avg_ell / 10;
+%d_theta = avg_theta / 10;
+%
+%min_ell = d_ell;
+%min_theta = d_theta;
+%
+%max_ell = avg_ell * 100;
+%max_theta = avg_theta * 100;
+
+d_ell = avg_ell / 100;
+d_theta = avg_theta;
 
 min_ell = d_ell;
-min_theta = d_ell;
+min_theta = 100 * avg_theta;
 
-max_ell = avg_ell * 100;
-max_theta = avg_theta * 100;
+max_ell = avg_ell / 10;
+max_theta = avg_theta * 500;
+
+disp(sprintf('min,avg,max L: %f   %f   %f', min_ell, avg_ell, max_ell));
+disp(sprintf('min,avg,max þ: %f   %f   %f', min_theta, avg_theta, max_theta));
 
 % We are going to apply N-fold cross validation to find the best regressor.
 max_LLog = -Inf * ones(N, 1);
@@ -59,8 +71,10 @@ end
 
 sigma2 = 1e-7;
 
-for ell=[min_ell:d_ell:avg_ell, (2*avg_ell):avg_ell:max_ell]
-  for theta=[min_theta:d_theta:avg_theta, (2*avg_theta):avg_theta:max_theta]
+ell_inspect_range = [min_ell:d_ell:max_ell];%[min_ell:d_ell:avg_ell, (2*avg_ell):avg_ell:max_ell];
+theta_inspect_range = [min_theta:d_theta:max_theta];%[min_theta:d_theta:avg_theta, (2*avg_theta):avg_theta:max_theta];
+for ell=ell_inspect_range
+  for theta=theta_inspect_range
     sprintf('th: %f\nel: %f', theta, ell);
     k = squared_exponential(theta, ell);
     parfor i=1:N
@@ -88,6 +102,8 @@ disp('ell');
 disp(ell);
 disp('theta');
 disp(theta);
+disp(max_LLog);
+disp([max_ell;max_theta]);
 
 k = squared_exponential(theta, ell);
 performance = 0;
@@ -95,7 +111,7 @@ for i=1:size(test, 1)
   [prediction, sigma_2, ~] = gaussian_process(train(:, 1), train(:, 2), k, sigma2, test(i, 1));
   performance = performance + (prediction - test(i, 2)) * (prediction - test(i, 2));
   plot(test(i, 1), prediction, 'mo');
-  line([test(i, 1), prediction - sigma_2], [test(i, 1), prediction + sigma_2], 'Color', 'm');
+  %line([test(i, 1), test(i, 1)], [prediction - sigma_2, prediction + sigma_2], 'Color', 'm');
 end
 
 hold off;
