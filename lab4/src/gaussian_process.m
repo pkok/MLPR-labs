@@ -1,4 +1,4 @@
-% [f_, sigma2_, LLog] = gaussian_process(X, t, k, sigma2, x_)
+% [f_, sigma_2, LLog] = gaussian_process(X, t, k, sigma2, x_)
 %
 % Compute the most likely prediction and variance on our prediction, together
 % with the probability of the training data under the model.
@@ -10,12 +10,12 @@
 %   x_        : A test input. Its target will be predicted.
 % Returns:
 %   f_        : The most likely prediction for the test input x_.
-%   sigma2_   : The variance on the prediction.
+%   sigma_2   : The variance on the prediction.
 %   LLog      : How probable is our training data under the model?
 %
 % Patrick de Kok
-%function [f_, sigma2_, LLog] = gaussian_process(X, t, k, sigma2, x_)
-function [f_, sigma2_, LLog] = gaussian_process(X, t, k, sigma2, x_)
+%function [f_, sigma_2, LLog] = gaussian_process(X, t, k, sigma2, x_)
+function [f_, sigma_2, LLog] = gaussian_process(X, t, k, sigma2, x_)
 N = size(X, 1);
 
 K = zeros(N, N);
@@ -34,5 +34,5 @@ L = chol(K + (sigma2 * eye(N)), 'lower');
 alpha = L' \ (L \ t);
 f_ = k_' * alpha;
 v = L \ k_;
-sigma2_ = k(x_, x_) - v' * v;
+sigma_2 = k(x_, x_) - v' * v;
 LLog = -0.5 * t' * alpha - sum(diag(log(L))) - (N / 2) * log(2*pi);
