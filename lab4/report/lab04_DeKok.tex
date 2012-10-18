@@ -7,12 +7,14 @@
 \usepackage{mathabx}
 
 \DeclareMathOperator*{\argmax}{arg\,max}
-\DeclareMathOperator*{\Bern}{Bern}
-\newcommand{\V}[1]{\ensuremath{\mathbf{#1}}}
+\DeclareMathOperator*{\chol}{cholesky}
+\DeclareMathOperator*{\err}{E}
+\newcommand{\V}[1]{\ensuremath{\boldsymbol{#1}}}
 \newcommand{\T}[1]{\ensuremath{\mathtt{#1}}}
 \newcommand{\mean}{\ensuremath{\boldsymbol{\mu}}}
 \newcommand{\cov}{\ensuremath{\boldsymbol{\Sigma}}}
 \newcommand{\npdf}{\ensuremath{\mathcal{N}}}
+\newcommand{\dif}{\ensuremath{\mathrm{d}}}
 
 \newcommand{\hl}[1]{\colorbox{cyan}{#1}}
 \newcommand{\mhl}[1]{\mathchoice%
@@ -83,5 +85,79 @@ In the first assignment, I have looked at a Gaussian distribution $\mathcal G_1 
 
 
 \section{Gaussian Processes}
+In this exercise, the temperature must be predicted from the number of chirps per time unit crickets produce during summer.  The dataset describing the data to learn from, \texttt{chirps.mat}, contains only 15 chirp-temperature pairs.  Because of this small dataset size, the \hl{test set contains 1 data point}, and \hl{14-fold cross-validation} is applied to acquire the best learner.  A plot of the dataset is given in \autoref{fig:ex2plot1}.
 
+
+\begin{figure}
+  \begin{center}
+  \caption{A plot of the dataset \texttt{chirps.mat}.  The red ``$\color{red}+$'''s represent the train data points. The blue ``$\color{blue}\times$''' represent the test data point.}
+    \label{fig:ex2plot1}
+    \includegraphics[width=0.8\textwidth]{ex2plot1}
+  \end{center}
+\end{figure}
+
+
+I have written an implementation of Gaussian process according to Algorithm 1 from the assignment in MATLAB in \texttt{gaussian\_process.m}.  The implementation has been done as close as possible to the pseudocode.  The \texttt{gaussian\_process} function has the following inputs:
+\begin{itemize}
+\item $\T{X}$: an $\T{N}$ by $\T{D}$ matrix, representing $\T{N}$ data points of dimensionality $\T{D}$, which are used for training.
+\item $\T{t}$: an $\T{N}$ by $\T{1}$ vector.  These are the target values, which the Gaussian process should approximate.
+\item $\T{k}$: the kernel function.  This function should accept two arguments, both $\T{1}$ by $\T{D}$ dimensional vectors.
+\item $\T{sigma2}$: the squared variance on the target value.  This represents the amount of noise in the data.
+\item $\T{x\_}$: th
+\end{itemize}
+As in the pseudocode, the provided MATLAB implementation returns three values:
+\begin{itemize}
+\item $\T{f\_}$: the most likely temperature, given the input chirps frequency.
+\item $\T{sigma\_2}$: the squared variance on the prediction.
+\item $\T{LLog}$: the log-likelihood of the provided train data under the model.  This can also be seen as a measure how well the model can ``explain'' the data.
+\end{itemize}  
+
+The kernel function $k(\V{x}, \V{x}')$ as defined by Equation 9 is returned by calling \texttt{squared\_exponential} with specific values for $\theta$ and $l$, called the hyperparameters.  These parameters represent a quantity associated with the spread of the temperature and chirp frequency in the train data set.
+
+Learning from data in terms of Gaussian processes means to find the Gaussian process under which the dataset is most likely to occur.  This means that the program needs to find values for the hyperparameters of the kernel function $k$ which maximize the (log-)likelihood.  In this case, the software has to optimize the log-likelihood by finding the correct values of $\theta$ and $l$.  This can be done in two ways:
+\begin{itemize}
+\item Gradient ascent.  For this, I need to compute the gradient with respect to $\theta$ and $l$ of the following expression:
+\begin{align*}
+- \frac{1}{2}\V{t}^\top (\V{K} \backslash \V{t}) - \sum_i \log \chol(\V{K}) - \frac{N}{2} \log 2\pi
+\end{align*}
+where $\V{t}$ are the labels of the train data, $N$ the size of the train data set, and $\V{K}$ a matrix with values $K_{ij} = k(x_i, x_j)$ for elements $x_i, x_j$ in the dataset $\V{X}$.
+
+Although this will give the best result, finding the gradient of this expression is very hard.
+
+\item Grid search.  With a grid search, I will look for the highest log-likelihood of the Gaussian process for values of $\theta$ and $l$ in a certain range and step size.
+
+When applying this method, the best combination of the hyperparameters might not be found, because that optimum might be in between two steps, or outside the searching range.
+\end{itemize}
+
+The error of the Gaussian process will be measured by the mean square error of the predicted mean temperature, associated with the input chirp frequency.  For $n$ targets $\V{t}$ and their corresponding predictions $\V{t}^\ast$, the error is given by:
+\begin{align*}
+\err(\V{t}, \V{t}^\ast)
+  &= \frac{1}{n} \sum_i^n \left(t_i - t^\ast_i\right)^2
+\end{align*}
+
+I have decided to apply the grid search approach.  The lower and upper bounds on the search range have been based on the data in terms of the average temperature and chirps among the data points.  Let $\hat\theta$ and $\hat l$ be the average temperature and average chirp frequency among the test-and-validation set.  For ease of reading, I will now call use $\V{\hat\theta} = \begin{bmatrix}\hat\theta\\\hat l\end{bmatrix}$ and $\V{\theta} = \begin{bmatrix}\theta\\l\end{bmatrix}$.  Initially, I have looked at the joined ranges $[0.1\V{\hat\theta}, \V{\hat\theta}]$ with step size $\dif \V{\theta} = 0.1\V{\hat\theta}$, and $(\V{\hat\theta}, 100 \V{\hat\theta}]$ with step size $\dif \V{\theta} = \V{\hat\theta}$\footnote{At first, I wanted to look at the range $[0.1\V{\hat\theta}, 100\V{\hat\theta}]$ with step size $0.1\V{\hat\theta}$. Combining this with the cross validation, I would test 14 million Gaussian processes.  After I have implemented the cross-validation part in a multithreading way and ran it overnight on a quadcore pc with no other big tasks, and the algorithm had not finished in the afternoon, I came to the conclusion this must not have been the idea.}.  The log-likelihood, error and squared variance have been plotted against the values of $\theta$ and $l$ in these ranges in \autoref{fig:ex2plot2log}, \autoref{fig:ex2plot2err} and \autoref{fig:ex2plot2var}.
+
+
+\begin{figure}
+  \begin{center}
+    \caption{The log-likelihood returned by the Gaussian process has been plotted against hyperparameters $\theta, l$.  Both hyperparameters are in the range of a tenth of its average in the dataset up to hundred times the average.  Higher, red values for the log-likelihood are more desirable.}
+    \label{fig:ex2plot2log}
+  \end{center}
+\end{figure}
+
+
+\begin{figure}
+  \begin{center}
+    \caption{The error of the Gaussian process has been plotted against hyperparameters $\theta, l$.  Both hyperparameters are in the range of a tenth of its average in the dataset up to hundred times the average.  The error is measured as the mean square error among the test samples.  Lower, blue values for the mean square error are more desirable.}
+    \label{fig:ex2plot2err}
+  \end{center}
+\end{figure}
+
+
+\begin{figure}
+  \begin{center}
+    \caption{The squared variance of the Gaussian process has been plotted against hyperparameters $\theta, l$.  Both hyperparameters are in the range of a tenth of its average in the dataset up to hundred times the average.  The error is measured as the mean square error among the test samples.}
+    \label{fig:ex2plot2var}
+  \end{center}
+\end{figure}
 \end{document}
