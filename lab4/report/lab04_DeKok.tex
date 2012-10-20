@@ -103,18 +103,20 @@ I have written an implementation of Gaussian process according to Algorithm 1 fr
 \item $\T{t}$: an $\T{N}$ by $\T{1}$ vector.  These are the target values, which the Gaussian process should approximate.
 \item $\T{k}$: the kernel function.  This function should accept two arguments, both $\T{1}$ by $\T{D}$ dimensional vectors.
 \item $\T{sigma2}$: the squared variance on the target value.  This represents the amount of noise in the data.
-\item $\T{x\_}$: th
+\item $\T{x\_}$: a data point, for which the Gaussian process shall predict the target value.
 \end{itemize}
 As in the pseudocode, the provided MATLAB implementation returns three values:
 \begin{itemize}
-\item $\T{f\_}$: the most likely temperature, given the input chirps frequency.
+\item $\T{f\_}$: the most likely target value, given the input properties.
 \item $\T{sigma\_2}$: the squared variance on the prediction.
 \item $\T{LLog}$: the log-likelihood of the provided train data under the model.  This can also be seen as a measure how well the model can ``explain'' the data.
 \end{itemize}  
 
+The exercise tells that $\T{sigma2}$ should have a small value.  Therefore it is set to $10^{-7}$, unless stated differently.
+
 The kernel function $k(\V{x}, \V{x}')$ as defined by Equation 9 is returned by calling \texttt{squared\_exponential} with specific values for $\theta$ and $l$, called the hyperparameters.  These parameters represent a quantity associated with the spread of the temperature and chirp frequency in the train data set.
 
-Learning from data in terms of Gaussian processes means to find the Gaussian process under which the dataset is most likely to occur.  This means that the program needs to find values for the hyperparameters of the kernel function $k$ which maximize the (log-)likelihood.  In this case, the software has to optimize the log-likelihood by finding the correct values of $\theta$ and $l$.  This can be done in two ways:
+Learning from data in terms of Gaussian processes means to find the Gaussian process under which the dataset is most likely to occur.  This means that the program needs to find values for the hyperparameters of the kernel function $k$ which \hl{maximize the (log-)likelihood}.  In this case, the software has to optimize the log-likelihood by finding the correct values of $\theta$ and $l$.  This can be done in two ways:
 \begin{itemize}
 \item Gradient ascent.  For this, I need to compute the gradient with respect to $\theta$ and $l$ of the following expression:
 \begin{align*}
@@ -128,36 +130,138 @@ Although this will give the best result, finding the gradient of this expression
 
 When applying this method, the best combination of the hyperparameters might not be found, because that optimum might be in between two steps, or outside the searching range.
 \end{itemize}
+I have also searched for the hyperparameters which minimize the estimated error, as well as maximize the variance.
 
-The error of the Gaussian process will be measured by the mean square error of the predicted mean temperature, associated with the input chirp frequency.  For $n$ targets $\V{t}$ and their corresponding predictions $\V{t}^\ast$, the error is given by:
+The \hl{estimated error} of the Gaussian process will be measured by the \hl{mean square error} of the predicted mean temperature, associated with the input chirp frequency.  For $n$ targets $\V{t}$ and their corresponding predictions $\V{t}^\ast$, the error is given by:
 \begin{align*}
 \err(\V{t}, \V{t}^\ast)
   &= \frac{1}{n} \sum_i^n \left(t_i - t^\ast_i\right)^2
 \end{align*}
+A performance measure should increase when the inspected subject behaves (in this case, generalizes) more to our likings.  Therefore, I will define the \hl{performance measure} as the \hl{negative of the estimated error}.
 
-I have decided to apply the grid search approach.  The lower and upper bounds on the search range have been based on the data in terms of the average temperature and chirps among the data points.  Let $\hat\theta$ and $\hat l$ be the average temperature and average chirp frequency among the test-and-validation set.  For ease of reading, I will now call use $\V{\hat\theta} = \begin{bmatrix}\hat\theta\\\hat l\end{bmatrix}$ and $\V{\theta} = \begin{bmatrix}\theta\\l\end{bmatrix}$.  Initially, I have looked at the joined ranges $[0.1\V{\hat\theta}, \V{\hat\theta}]$ with step size $\dif \V{\theta} = 0.1\V{\hat\theta}$, and $(\V{\hat\theta}, 100 \V{\hat\theta}]$ with step size $\dif \V{\theta} = \V{\hat\theta}$\footnote{At first, I wanted to look at the range $[0.1\V{\hat\theta}, 100\V{\hat\theta}]$ with step size $0.1\V{\hat\theta}$. Combining this with the cross validation, I would test 14 million Gaussian processes.  After I have implemented the cross-validation part in a multithreading way and ran it overnight on a quadcore pc with no other big tasks, and the algorithm had not finished in the afternoon, I came to the conclusion this must not have been the idea.}.  The log-likelihood, error and squared variance have been plotted against the values of $\theta$ and $l$ in these ranges in \autoref{fig:ex2plot2log}, \autoref{fig:ex2plot2err} and \autoref{fig:ex2plot2var}.
+I have decided to apply the \hl{grid search approach}.  The lower and upper bounds on the search range have been based on the data in terms of the average temperature and chirps among the data points.  Let $\bar\theta$ and $\bar l$ be the average temperature and average chirp frequency among the test-and-validation set.  For ease of reading, I will use $\V{\bar\theta} = \begin{bmatrix}\bar\theta\\\bar l\end{bmatrix}$ and $\V{\theta} = \begin{bmatrix}\theta\\l\end{bmatrix}$ as shorthands.  Initially, I have looked at the joined ranges $[0.1\V{\bar\theta}, \V{\bar\theta}]$ with step size $\dif \V{\theta} = 0.1\V{\bar\theta}$, and $(\V{\bar\theta}, 100 \V{\bar\theta}]$ with step size $\dif \V{\theta} = \V{\bar\theta}$\footnote{At first, I wanted to look at the range $[0.1\V{\bar\theta}, 100\V{\bar\theta}]$ with step size $0.1\V{\bar\theta}$. Combining this with the cross validation, I would test 14 million Gaussian processes.  After I have implemented the cross-validation part in a multithreading way and ran it overnight on a quadcore pc with no other big tasks, and the algorithm had not finished in the afternoon, I came to the conclusion this must not have been the idea.}.  %The log-likelihood, error and squared variance have been plotted against the values of $\theta$ and $l$ in the aforementioned ranges in \autoref{fig:ex2plot2log}, \autoref{fig:ex2plot2err} and \autoref{fig:ex2plot2var}.
 
+The results of the grid search, for noise levels $\sigma^2 = 10^{-7}$ and $\sigma^2 = 10^{-4}$, and tests sets of 1 up to 5 items, are presented in \autoref{tab:s7} and \autoref{tab:s4}.  In the first column, the noise level is indicated.  The second column contains data on how many test items have been used.  In the third and fourth column can be found which heuristic has been optimized, and what its optimal value is.  Optimization has been done as described above; log-likelihood and variance are maximized, while the expected error is minimized.  In the sixth and seventh column are recorded the optimal values $\V{\hat\theta}$ for the heuristic.  The last column presents the performance.
+
+In \hl{\autoref{fig:ex2plot3}}, one can find the \hl{expected mean and its variance for input values 12 through 22} for various values of $\V{\hat\theta}$.  The expected mean and variance for the parameterization which optimizes the log-likelihood is drawn as a red line.  The expected mean and variance generated by $\V{\hat\theta}$ for a minimal error is supplied in green.  The blue line is generated by $\V{\hat\theta}$ which maximize the variance.  The corresponding values for $\V{\hat\theta} = \begin{bmatrix}\hat\theta \\\hat l\end{bmatrix}$ can be found in \autoref{tab:s7}.
+
+It is notable that, although the \hl{variance} is so low that it cannot be distinguished from the mean for most part of the lines in \autoref{fig:ex2plot3}, it (even visually) \hl{increases for inputs which are further} from train data points.  This is not surprising; the further you are from known data, the less precise your estimation will be.  Because variance is a measure of confidence, this is only expected.
+
+\begin{table}
+  \caption{The performance of Gaussian processes based on differently selected hyperparameters $\hat\theta$ and $\hat l$ with noise level $\sigma^2=10^{-7}$.}
+  \label{tab:s7}
+  \begin{tabular}{cclcccc}
+    \hline
+    $\sigma^2$ & Test items & Criterion & Cr.\ value & $\hat\theta$ & $\hat l$ & Performance \\
+    \hline
+    \hline
+    $10^{-7}$ & 1 & Log-likelihood & $-1.777 \times 10^8$ & $0.2\bar\theta$ & $93 \bar l$ & $-75.422834$ \\
+              &   & Expected error & $3.067816$ & $0.7\bar\theta$ & $\bar l$ & $-112.484638$ \\
+              &   & Variance & $1.050682$ & $0.1\bar\theta$ & $98\bar l$ & $-75.563232$ \\
+    \hline
+              & 2 & Log-likelihood & $-1.777 \times 10^8$ & $0.2\bar\theta$ & $93 \bar l$ & $-79.125398$ \\
+              &   & Expected error & $3.067816$ & $0.7\bar\theta$ & $\bar l$ & $-100.501221$ \\
+              &   & Variance & $1.050682$ & $0.1\bar\theta$ & $98\bar l$ & $-79.062857$ \\
+    \hline
+              & 3 & Log-likelihood & $-1.777 \times 10^8$ & $0.2\bar\theta$ & $93 \bar l$ & $-78.9199$ \\
+              &   & Expected error & $3.067816$ & $0.7\bar\theta$ & $\bar l$ & $-90.315318$ \\
+              &   & Variance & $1.050682$ & $0.1\bar\theta$ & $98\bar l$ & $-78.967861$ \\
+    \hline
+              & 4 & Log-likelihood & $-1.777 \times 10^8$ & $0.2\bar\theta$ & $93 \bar l$ & $-79.130449$ \\
+              &   & Expected error & $3.067816$ & $0.7\bar\theta$ & $\bar l$ & $-98.082120$ \\
+              &   & Variance & $1.050682$ & $0.1\bar\theta$ & $98\bar l$ & $-78.554024$ \\
+    \hline
+              & 5 & Log-likelihood & $-1.777 \times 10^8$ & $0.2\bar\theta$ & $93 \bar l$ & $-70.188813$ \\
+              &   & Expected error & $3.067816$ & $0.7\bar\theta$ & $\bar l$ & $-69.918030$ \\
+              &   & Variance & $1.050682$ & $0.1\bar\theta$ & $98\bar l$ & $-71.878425$ \\
+    \hline
+  \end{tabular}
+\end{table}
+\begin{table}
+  \caption{The performance of Gaussian processes based on differently selected hyperparameters $\hat\theta$ and $\hat l$ with noise level $\sigma^2=10^{-4}$.}
+  \label{tab:s4}
+  \begin{tabular}{cclcccc}
+    \hline
+    $\sigma^2$ & Test items & Criterion & Cr.\ value & $\hat\theta$ & $\hat l$ & Performance \\
+    \hline
+    \hline
+    $10^{-4}$ & 1 & Log-likelihood & $-177937.199801$ & $0.4\bar\theta$ & $98 \bar l$ & $-75.7453$ \\
+              &   & Expected error & $3.043957$ & $0.8\bar\theta$ & $1.1\bar l$ & $-84.724637$ \\
+              &   & Variance & $1.050777$ & $0.1\bar\theta$ & $98\bar l$ & $-75.6286$ \\
+    \hline
+              & 2 & Log-likelihood & $-175634.144192$ & $0.3\bar\theta$ & $98 \bar l$ & $-78.6657$ \\
+              &   & Expected error & $7.861724$ & $0.1\bar\theta$ & $\bar l$ & $-84.7246$ \\
+              &   & Variance & $0.000088$ & $0.1\bar\theta$ & $98\bar l$ & $-75.6286$ \\
+    \hline
+              & 3 & Log-likelihood & $-4215.151426$ & $0.4\bar\theta$ & $98 \bar l$ & $-78.953028$ \\
+              &   & Expected error & $8.514720$ & $0.9\bar\theta$ & $0.1\bar l$ & $-82342356$ \\
+              &   & Variance & $25.881656$ & $0.1\bar\theta$ & $98\bar l$ & $-78.965517$ \\
+    \hline
+              & 4 & Log-likelihood & $-4123.566594$ & $0.3\bar\theta$ & $98 \bar l$ & $-77.410747$ \\
+              &   & Expected error & $0.621619$ & $2\bar\theta$ & $85\bar l$ & $-77.931735$ \\
+              &   & Variance & $11.443740$ & $0.1\bar\theta$ & $98\bar l$ & $-77.452683$ \\
+    \hline
+              & 5 & Log-likelihood & $-4037.452951$ & $0.3\bar\theta$ & $98 \bar l$ & $-77.516761$ \\
+              &   & Expected error & $1.525246$ & $0.6\bar\theta$ & $1.2 \bar l$ & $-69.502743$ \\
+              &   & Variance & $13.491900$ & $0.1\bar\theta$ & $98\bar l$ & $-77.912734$ \\
+    \hline
+  \end{tabular}
+\end{table}
+%\begin{table}
+%  \caption{The performance of Gaussian processes based on differently selected hyperparameters $\hat\theta$ and $\hat l$ with noise level $\sigma^2=10^{-1}$.}
+%  \label{tab:s1}
+%  \begin{tabular}{cclcccc}
+%    \hline
+%    $\sigma^2$ & Test items & Criterion & Cr.\ value & $\hat\theta$ & $\hat l$ & Performance \\
+%    \hline
+%    \hline
+%    $10^{-4}$ & 1 & Log-likelihood & $-4037.452951$ & $0.3\bar\theta$ & $98 \bar l$ & $-$ \\
+%              &   & Expected error & $1.525246$ & $0.6\bar\theta$ & $1.2\bar l$ & $-$ \\
+%              &   & Variance & $13.491900$ & $0.1\bar\theta$ & $98\bar l$ & $-$ \\
+%    \hline
+%              & 2 & Log-likelihood & $-4037.452951$ & $0.3\bar\theta$ & $98 \bar l$ & $-$ \\
+%              &   & Expected error & $1.525246$ & $0.6\bar\theta$ & $1.2\bar l$ & $-$ \\
+%              &   & Variance & $13.491900$ & $0.1\bar\theta$ & $98\bar l$ & $-$ \\
+%    \hline
+%              & 3 & Log-likelihood & $-4037.452951$ & $0.3\bar\theta$ & $98 \bar l$ & $-$ \\
+%              &   & Expected error & $1.525246$ & $0.6\bar\theta$ & $1.2\bar l$ & $-$ \\
+%              &   & Variance & $13.491900$ & $0.1\bar\theta$ & $98\bar l$ & $-$ \\
+%    \hline
+%              & 4 & Log-likelihood & $-4037.452951$ & $0.3\bar\theta$ & $98 \bar l$ & $-$ \\
+%              &   & Expected error & $1.525246$ & $0.6\bar\theta$ & $1.2\bar l$ & $-$ \\
+%              &   & Variance & $13.491900$ & $0.1\bar\theta$ & $98\bar l$ & $-$ \\
+%    \hline
+%              & 5 & Log-likelihood & $-4037.452951$ & $0.3\bar\theta$ & $98 \bar l$ & $-$ \\
+%              &   & Expected error & $1.525246$ & $0.6\bar\theta$ & $1.2 \bar l$ & $-$ \\
+%              &   & Variance & $13.491900$ & $0.1\bar\theta$ & $98\bar l$ & $-$ \\
+%    \hline
+%  \end{tabular}
+%\end{table}
+
+%\begin{figure}
+%  \begin{center}
+%    \caption{The log-likelihood returned by the Gaussian process has been plotted against hyperparameters $\theta, l$.  Both hyperparameters are in the range of a tenth of its average in the dataset up to hundred times the average.  Higher, red values for the log-likelihood are more desirable.}
+%    \label{fig:ex2plot2log}
+%  \end{center}
+%\end{figure}
+%\begin{figure}
+%  \begin{center}
+%    \caption{The error of the Gaussian process has been plotted against hyperparameters $\theta, l$.  Both hyperparameters are in the range of a tenth of its average in the dataset up to hundred times the average.  The error is measured as the mean square error among the test samples.  Lower, blue values for the mean square error are more desirable.}
+%    \label{fig:ex2plot2err}
+%  \end{center}
+%\end{figure}
+%\begin{figure}
+%  \begin{center}
+%    \caption{The squared variance of the Gaussian process has been plotted against hyperparameters $\theta, l$.  Both hyperparameters are in the range of a tenth of its average in the dataset up to hundred times the average.  The error is measured as the mean square error among the test samples.}
+%    \label{fig:ex2plot2var}
+%  \end{center}
+%\end{figure}
 
 \begin{figure}
   \begin{center}
-    \caption{The log-likelihood returned by the Gaussian process has been plotted against hyperparameters $\theta, l$.  Both hyperparameters are in the range of a tenth of its average in the dataset up to hundred times the average.  Higher, red values for the log-likelihood are more desirable.}
-    \label{fig:ex2plot2log}
-  \end{center}
-\end{figure}
-
-
-\begin{figure}
-  \begin{center}
-    \caption{The error of the Gaussian process has been plotted against hyperparameters $\theta, l$.  Both hyperparameters are in the range of a tenth of its average in the dataset up to hundred times the average.  The error is measured as the mean square error among the test samples.  Lower, blue values for the mean square error are more desirable.}
-    \label{fig:ex2plot2err}
-  \end{center}
-\end{figure}
-
-
-\begin{figure}
-  \begin{center}
-    \caption{The squared variance of the Gaussian process has been plotted against hyperparameters $\theta, l$.  Both hyperparameters are in the range of a tenth of its average in the dataset up to hundred times the average.  The error is measured as the mean square error among the test samples.}
-    \label{fig:ex2plot2var}
+    \caption{The expected means together with the variance generated by the Gaussian process, with $\sigma^2=10^{-7}$ and 14 train data points.  The red line represents the means generated with the hyperparameters which optimize the log-likelihood $\hat\theta = 0.2\bar\theta$, $\hat l = 93\bar l$.  The blue line is parameterized with $\hat\theta=0.7\bar\theta, \hat l = \bar l$, which minimize the expected mean square error.  The green line is generated with $\hat\theta=0.1\bar\theta, \hat l = 98\bar l$.  The variance is on most places not visible, as it is really close to the mean.}
+    \label{fig:ex2plot3}
+    \includegraphics[width=0.8\textwidth]{ex2plot3}
   \end{center}
 \end{figure}
 \end{document}
