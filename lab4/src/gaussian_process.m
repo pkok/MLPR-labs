@@ -34,5 +34,5 @@ L = chol(K + (sigma2 * eye(N)), 'lower');
 alpha = L' \ (L \ t);
 f_ = k_' * alpha;
 v = L \ k_;
-sigma_2 = k(x_, x_) - v' * v;
-LLog = -0.5 * t' * alpha - sum(diag(log(L))) - (N / 2) * log(2*pi);
+sigma_2 = k(x_, x_) - (v' * v);
+LLog = (-0.5 * t' * alpha) - sum(log(diag(L))) - ((N / 2) * log(2*pi));

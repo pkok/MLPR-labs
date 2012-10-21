@@ -1,4 +1,4 @@
-function performance = ex2(random_seed)
+function performance = ex2s7t2(random_seed)
 
 if nargin ~= 1
   random_seed = 0;
@@ -15,8 +15,8 @@ load('chirps.mat');
 chirps = chirps(randperm(size(chirps, 1)), :);
 
 % Because the dataset is small, use only 1 test sample.
-train = chirps(1:end-1, :);
-test = chirps(end, :);
+train = chirps(1:end-4, :);
+test = chirps(end-3:end, :);
 
 N = size(train, 1);
 
@@ -73,7 +73,6 @@ if poolSize == 0
   matlabpool open;
 end
 
-disp('Starting to loop!');
 for iter_ell=1:size(ell_inspect_range,2)
   tic;
   if iter_ell <= 10
@@ -94,7 +93,6 @@ for iter_ell=1:size(ell_inspect_range,2)
       var_overview(iter_ell, iter_theta, i) = sigma_2;
     end
   end
-  disp(sprintf('outer round %i ran in %f s', iter_ell, toc));
 end
 
 save('overview2.mat', 'ell_inspect_range', 'theta_inspect_range', 'llog_overview', 'err_overview', 'var_overview');
@@ -206,7 +204,7 @@ for i=1:size(test, 1)
   %plot(test(i, 1), f_, 'mo');
   performance = performance + f_;
 end
-performance = performance / size(test, 1)
+performance = performance / size(test, 1);
 disp(sprintf('Performance based on llog: %f', performance));
 
 k = squared_exponential(theta_err, ell_err);
@@ -239,7 +237,7 @@ for i=1:size(test, 1)
   %plot(test(i, 1), f_, 'mo');
   pperformance = pperformance + f_;
 end
-pperformance = pperformance / size(test, 1)
+pperformance = pperformance / size(test, 1);
 disp(sprintf('Performance based on error: %f', pperformance));
 
 k = squared_exponential(theta_var, ell_var);
@@ -272,7 +270,7 @@ for i=1:size(test, 1)
   %plot(test(i, 1), f_, 'mo');
   pperformance = pperformance + f_;
 end
-pperformance = pperformance / size(test, 1)
+pperformance = pperformance / size(test, 1);
 disp(sprintf('Performance based on variance: %f', pperformance));
 
 
@@ -293,3 +291,4 @@ hold off;
 %xlabel('l');
 %ylabel('theta');
 %zlabel('Squared variance (sigma^2)');
+

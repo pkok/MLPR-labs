@@ -39,7 +39,7 @@ F = mvnpdf([X1(:) X2(:)],mu,Sigma);
 F = reshape(F,length(x1),length(x1));
 
 figure();
-surf(x1,x1,F);
+surf(x1,x1,F, 'linestyle','none');
 colorbar();
 xlabel('x1');
 ylabel('x2');

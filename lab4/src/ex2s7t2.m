@@ -1,4 +1,4 @@
-function performance = ex2(random_seed)
+function performance = ex2s7t2(random_seed)
 
 if nargin ~= 1
   random_seed = 0;
@@ -15,8 +15,8 @@ load('chirps.mat');
 chirps = chirps(randperm(size(chirps, 1)), :);
 
 % Because the dataset is small, use only 1 test sample.
-train = chirps(1:end-1, :);
-test = chirps(end, :);
+train = chirps(1:end-2, :);
+test = chirps(end-1:end, :);
 
 N = size(train, 1);
 
@@ -57,7 +57,7 @@ cross_label_fold = label_fold(:, end);
 train_fold = train_fold(1:end-1, :);
 label_fold = label_fold(1:end-1, :);
 
-sigma2 = 1e-4;
+sigma2 = 1e-7;
 
 ell_inspect_range = [min_ell:d_ell:avg_ell, (2*avg_ell):avg_ell:max_ell];%[min_ell:d_ell:max_ell];
 theta_inspect_range = [min_theta:d_theta:avg_theta, (2*avg_theta):avg_theta:max_theta];%[min_theta:d_theta:max_theta];
@@ -94,7 +94,6 @@ for iter_ell=1:size(ell_inspect_range,2)
       var_overview(iter_ell, iter_theta, i) = sigma_2;
     end
   end
-  disp(sprintf('outer round %i ran in %f s', iter_ell, toc));
 end
 
 save('overview2.mat', 'ell_inspect_range', 'theta_inspect_range', 'llog_overview', 'err_overview', 'var_overview');
@@ -146,6 +145,7 @@ best_pair = find(var_data == max(max(var_data)));
 ell_index = floor(best_pair / size(ell_inspect_range, 2));
 theta_index = mod(best_pair, size(ell_inspect_range, 2));
 disp(sprintf('Max. variance: %f', max(max(var_data))));
+disp(max(max(var_data)));
 disp(sprintf('best <theta,l> pair based on variance:'));
 disp([ell_index , theta_index]);
 if max(size(best_pair)) ~= 1
@@ -293,3 +293,4 @@ hold off;
 %xlabel('l');
 %ylabel('theta');
 %zlabel('Squared variance (sigma^2)');
+
